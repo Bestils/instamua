@@ -7,14 +7,13 @@ object ExternalDependencies {
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion exclude ("org.slf4j", "slf4j-api")
   )
 
-  val json4sJackson = "org.json4s" %% "json4s-jackson" % "3.2.11"
+  val json4sNative = "org.json4s" %% "json4s-native" % "3.2.11"
 
   val sprayVersion = "1.3.1"
   val sprayDependencies = Seq(
     "io.spray" %% "spray-can" % sprayVersion,
     "io.spray" %% "spray-http" % sprayVersion,
-    "io.spray" %% "spray-routing" % sprayVersion,
-    "io.spray" %% "spray-json" % "1.3.2" exclude ("org.scala-lang" , "scala-library")
+    "io.spray" %% "spray-routing" % sprayVersion
   )
 
   val slickDependencies = Seq(

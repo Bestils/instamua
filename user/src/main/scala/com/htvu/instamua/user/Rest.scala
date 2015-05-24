@@ -1,25 +1,23 @@
-package com.htvu.cclone.user
+package com.htvu.instamua.user
 
 import akka.actor.{ActorRefFactory, ActorSystem}
 import akka.io.IO
-import com.htvu.cclone.user.api.RoutedHttpService
-import com.htvu.cclone.user.api.services.{RelationshipService, UserInfoService}
+import com.htvu.instamua.user.api.RoutedHttpService
+import com.htvu.instamua.user.api.services.UserService
 import com.typesafe.config.ConfigFactory
 import spray.can.Http
 import spray.routing.HttpService
-import slick.driver.MySQLDriver.api._
 
 
 
 trait BootedCore extends HttpService {
   implicit val system = ActorSystem("user-services")
 
-  private val userInfoService = new UserInfoService()
-  private val relationshipService = new RelationshipService()
+  private val userInfoService = new UserService()
 
   val routes = {
     pathPrefix("api" / "v1") {
-      userInfoService.routes ~ relationshipService.routes
+      userInfoService.routes
     }
   }
   val rootService = system.actorOf(RoutedHttpService.props(routes), "root-service")

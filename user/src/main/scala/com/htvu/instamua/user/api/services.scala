@@ -1,4 +1,4 @@
-package com.htvu.cclone.user.api
+package com.htvu.instamua.user.api
 
 import akka.actor.{Props, ActorContext, Actor, ActorLogging}
 import spray.http.StatusCodes._
@@ -83,7 +83,6 @@ class RoutedHttpService(route: Route) extends Actor with HttpService with ActorL
   }
 
   def receive: Receive = {
-    println("started")
     runRoute(route)(handler, RejectionHandler.Default, context, RoutingSettings.default, LoggingContext.fromActorRefFactory)
   }
 }

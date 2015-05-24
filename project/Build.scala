@@ -34,7 +34,7 @@ object Builds extends Build {
       libraryDependencies ++= sprayDependencies,
       libraryDependencies ++= slickDependencies,
       libraryDependencies += mysql,
-      libraryDependencies += json4sJackson
+      libraryDependencies += json4sNative
     )
   )
 
