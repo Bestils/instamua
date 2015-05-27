@@ -3,8 +3,9 @@ package com.htvu.instamua.user.api.services
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
+import com.htvu.instamua.user.dao.Relationship.Relationship
 import com.htvu.instamua.user.dao.{UserPrivateInfo, UserRegistrationInfo, User, UserDAO}
-import UserDAO.UserSearchResult
+import com.htvu.instamua.user.dao.UserDAO.{FollowerListResult, UserSearchResult}
 import com.htvu.instamua.user.dao.UserPrivateInfo
 import com.htvu.instamua.user.api.JsonFormats
 import com.htvu.instamua.user.core.UserActor
@@ -74,28 +75,26 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
       path("followers") {
         get {
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetFollowers(userId))
+            _ complete (userActor ? GetFollowers(userId)).mapTo[Seq[FollowerListResult]]
           }
         }
       } ~
       path("followings") {
         get {
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetFollowings(userId))
+            _ complete (userActor ? GetFollowings(userId)).mapTo[Seq[FollowerListResult]]
           }
         }
       } ~
-      path("relationship") {
+      path("relationship" / IntNumber) { otherId =>
         get {
           respondWithMediaType(`application/json`) {
-            _ complete """{"relationship": "OK"}"""
+            _ complete (userActor ? GetRelationship(userId, otherId)).mapTo[Relationship]
           }
-        }
-      } ~
-      path("relationship") {
+        } ~
         post {
           respondWithMediaType(`application/json`) {
-            _ complete """{"new relationship": "OK"}"""
+            _ complete (userActor ? PostRelationship(userId, otherId)).mapTo[Int]
           }
         }
       }

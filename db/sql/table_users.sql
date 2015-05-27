@@ -11,15 +11,13 @@ create table user(
 drop table user;
 
 insert into user (username, full_name) 
-values ('hotienvu', 'Ho Tien Vu');
+values ('alice', 'Alice');
 
 select * from user;
 
-select user_id, username, full_name, profile_picture from user
-                     where username like '%vu%' or full_name like '%vu%';
 
-select x2.`user_id`, x2.`username`, x2.`full_name`, x2.`profile_picture` 
-from `user` x2 where x2.`full_name` like '%vu%'	;
+select x2.`user_id`, x2.`username`, x2.`full_name`, x2.`profile_picture` from `user` x2 
+where (x2.`username` like '%ho%') or (x2.`full_name` like '%ho%');
 
 create table user_private_info (
 	user_id int unsigned,

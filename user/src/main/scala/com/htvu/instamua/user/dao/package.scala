@@ -6,6 +6,9 @@ import slick.driver.MySQLDriver.api._
 
 package object dao {
 
+  type UserSearchResult = (Int, String, Option[String], Option[String])
+  type FollowerListResult = (Int, String, Option[String], Option[String], Boolean)
+
   case class User(
                    id: Int,
                    username: String,
@@ -76,7 +79,8 @@ package object dao {
 
   case class Follower(
                        userId: Int,
-                       followerId: Int
+                       followerId: Int,
+                       followBack: Boolean
                        )
 
   class Followers(tag: Tag) extends Table[Follower](tag, "follower") {
@@ -93,6 +97,11 @@ package object dao {
       onDelete = ForeignKeyAction.Cascade
     )
 
-    def * = (userId, followerId) <> (Follower.tupled, Follower.unapply)
+    def * = (userId, followerId, followBack) <> (Follower.tupled, Follower.unapply)
+  }
+
+  object Relationship extends Enumeration {
+    type Relationship = Value
+    val NO_REL, A_TO_B, A_TO_B_BOTH, B_TO_A, B_TO_A_BOTH = Value
   }
 }

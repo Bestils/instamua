@@ -1,19 +1,15 @@
 package com.htvu.instamua.user.dao
 
-import com.github.tototoshi.slick.MySQLJodaSupport._
-import org.joda.time.DateTime
+import com.htvu.instamua.user.dao.Relationship._
 import slick.driver.MySQLDriver.api._
-import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 
 object UserDAO {
   val db = Database.forConfig("jdbc")
 
-  type UserSearchResult = (Int, String, String, String)
-  type FollowerListResult = (Int, String, String, String, Boolean)
 
   val users = TableQuery[Users]
   val userPrivateInfos = TableQuery[UserPrivateInfos]
@@ -40,29 +36,62 @@ object UserDAO {
     db.run(updateUserPrivateInfo.update(newPrivateInfo).asTry)
   }
 
-  def searchUser(query: String): Future[Seq[UserSearchResult]] =
-    db.run(sql"""select user_id, username, full_name, profile_picture
-           from user where username like '%#$query%' or full_name like '%#$query%'""".as[UserSearchResult])
+  def searchUser(query: String): Future[Seq[UserSearchResult]] = {
+        db.run(sql"""select user_id, username, full_name, profile_picture
+               from user where username like '%#$query%' or full_name like '%#$query%'""".as[UserSearchResult])
+
+    // TODO: replace sql with the implementation below
+//    val q = for {
+//      user <- users if (user.username like s"%$query%") || (user.fullName like s"%$query%")
+//    } yield (user.id, user.username, user.fullName, user.profilePicture)
+//    println(q.result.statements)
+//    db.run(q.result)
+  }
 
   // RelationshipService
-  def getFollowers(userId: Int): Future[Seq[FollowerListResult]] = {
+  def getFollowers(a: Int): Future[Seq[FollowerListResult]] = {
+    val fs = followers filter (f => f.userId === a) map (f => (f.followerId, f.followBack)) union
+            (followers filter (f => f.followerId === a && f.followBack) map (f => (f.userId, f.followBack)))
     val query = for {
-      follower <- followers.filter(_.userId === userId)
-      user <- users if user.id === follower.followerId
-    } yield (user.id, user.username, user.fullName, user.profilePicture, follower.followBack)
+      f <- fs
+      u <- users if u.id === f._1
+    } yield (u.id, u.username, u.fullName.?, u.profilePicture.?, f._2)
     db.run(query.result)
   }
 
-  def getFollowings(userId: Int): Future[Seq[FollowerListResult]] = {
+  def getFollowings(a: Int): Future[Seq[FollowerListResult]] = {
+    val fs = followers filter (f => f.followerId === a) map (f => (f.userId, f.followBack)) union
+      (followers filter(f => f.userId === a && f.followBack) map (f => (f.followerId, f.followBack)))
     val query = for {
-      following <- followers.filter(_.followerId === userId)
-      user <- users if user.id === following.userId
-    } yield (user.id, user.username, user.fullName, user.profilePicture, following.followBack)
+      f <- fs
+      u <- users if u.id === f._1
+    } yield (u.id, u.username, u.fullName.?, u.profilePicture.?, f._2)
     db.run(query.result)
   }
 
-  def getRelationship(userId: Int, otherId: Int): Future[Boolean] =
-    db.run(followers.filter(_.userId === otherId).filter(_.followerId === userId).take(1).result.headOption) map (_ exists (_ => true))
+  def getRelationship(a: Int, b: Int)(implicit exec: ExecutionContext): Future[Relationship] =
+    db.run(followers.filter(f => (f.userId === a && f.followerId === b) ||
+      (f.userId === b && f.followerId === a)).take(1).result.headOption
+    ) map {
+      case Some(f) =>
+        if (f.userId == a && f.followerId == b)
+          if (f.followBack) B_TO_A_BOTH else B_TO_A
+        else
+          if (f.followBack) A_TO_B_BOTH else  A_TO_B
+      case None => NO_REL
+    }
 
-  def requestFollowing(userId: Int, otherId: Int): Future[Boolean] = ???
+  def postRelationship(a: Int, b: Int, currentRel: Relationship)(implicit exec: ExecutionContext): Future[Int] =
+    if (currentRel == B_TO_A)
+      db.run(followers.filter(u => u.userId === a && u.followerId === b) map
+        (f => (f.userId, f.followerId, f.followBack)) update ((a, b, true)))
+    else if (currentRel == B_TO_A_BOTH)
+      db.run(followers.filter(u => u.userId === a && u.followerId === b) map
+        (f => (f.userId, f.followerId, f.followBack)) update ((a, b, false)))
+    else if (currentRel == A_TO_B)
+      db.run(followers.filter(u => u.userId === b && u.followerId === a) delete)
+    else if (currentRel == A_TO_B_BOTH)
+      db.run(followers.filter(u => u.userId === b && u.followerId === a) map
+        (f => (f.userId, f.followerId, f.followBack)) update ((a, b, false)))
+    else db.run(DBIO.seq(followers += Follower(b, a, followBack = false))) map(f => 1)
 }
