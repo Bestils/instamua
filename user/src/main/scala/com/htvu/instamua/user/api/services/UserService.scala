@@ -3,12 +3,10 @@ package com.htvu.instamua.user.api.services
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
-import com.htvu.instamua.user.dao.Relationship.Relationship
-import com.htvu.instamua.user.dao.{UserPrivateInfo, UserRegistrationInfo, User, UserDAO}
-import com.htvu.instamua.user.dao.UserDAO.{FollowerListResult, UserSearchResult}
-import com.htvu.instamua.user.dao.UserPrivateInfo
 import com.htvu.instamua.user.api.JsonFormats
 import com.htvu.instamua.user.core.UserActor
+import com.htvu.instamua.user.dao.Relationship.Relationship
+import com.htvu.instamua.user.dao._
 import spray.http.MediaTypes.`application/json`
 import spray.routing.Directives
 
