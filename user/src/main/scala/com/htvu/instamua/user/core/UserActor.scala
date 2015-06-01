@@ -1,9 +1,8 @@
 package com.htvu.instamua.user.core
 
 import akka.actor.{Actor, ActorRef, Props}
-import com.htvu.instamua.user.dao.Relationship.Relationship
-import com.htvu.instamua.user.dao._
 import akka.pattern.pipe
+import com.htvu.instamua.user.dao._
 
 import scala.util.{Failure, Success, Try}
 
@@ -36,7 +35,7 @@ class UserActor extends Actor {
     case UpdateUserInfo(newUserInfo) =>
       UserDAO.updateUserInfo(newUserInfo) pipeTo sender
     case UpdateUserPrivateInfo(newUserPrivateInfo: UserPrivateInfo) =>
-      UserDAO.updateUserPrivateInfo(newUserPrivateInfo) pipeTo sender()
+      UserDAO.updateUserPrivateInfo(newUserPrivateInfo) pipeTo sender
     case SearchUser(query) =>
       UserDAO.searchUser(query) pipeTo sender
     case GetFollowers(userId) =>
@@ -49,10 +48,5 @@ class UserActor extends Actor {
       UserDAO.getRelationship(userId, otherId) flatMap(curRel =>
         UserDAO.postRelationship(userId, otherId, curRel)
       ) pipeTo sender
-  }
-
-  private def replyToSender(sender: ActorRef)(message: Try[_]) = message match {
-    case Success(value) => sender ! value
-    case Failure(t) => sender ! akka.actor.Status.Failure(t)
   }
 }

@@ -15,7 +15,7 @@ import scala.util.{Success, Try}
 
 class UserService()(implicit system: ActorSystem) extends Directives with JsonFormats {
 
-  val userActor = system.actorOf(UserActor.props())
+  val userActor = system.actorOf(UserActor.props(), "user-actor")
 
   import UserActor._
 
