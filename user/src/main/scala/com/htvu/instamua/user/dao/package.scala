@@ -104,4 +104,28 @@ package object dao {
     type Relationship = Value
     val NO_REL, A_TO_B, A_TO_B_BOTH, B_TO_A, B_TO_A_BOTH = Value
   }
+
+  case class Listing(
+                    id: String,
+                    category: String,
+                    price: Float,
+                    title: String,
+                    description: Option[String],
+                    location: String,
+                    comments: Seq[Comment],
+                    likes: Seq[Like]
+                    )
+  case class Comment(
+                    id: String,
+                    text: String,
+                    userId: Int,
+                    username: String,
+                    createdAt: DateTime,
+                    profilePicture: String
+                    )
+  case class Like(
+                 id: String,
+                 userId: Int,
+                 username: String
+                 )
 }

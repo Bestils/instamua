@@ -1,10 +1,8 @@
 package com.htvu.instamua.user.core
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, Props}
 import akka.pattern.pipe
 import com.htvu.instamua.user.dao._
-
-import scala.util.{Failure, Success, Try}
 
 object UserActor {
   case class GetUserInfo(userId: Int)

@@ -24,5 +24,7 @@ object ExternalDependencies {
     "com.zaxxer" % "HikariCP-java6" % "2.3.3"
   )
 
+  val reactiveMongo = "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23"
+
   val mysql = "mysql" % "mysql-connector-java" % "5.1.35"
 }

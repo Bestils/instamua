@@ -4,7 +4,7 @@ import ExternalDependencies._
 
 
 
-object Builds extends Build {
+object Build extends Build {
 
   private val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.htvu",
@@ -34,7 +34,8 @@ object Builds extends Build {
       libraryDependencies ++= sprayDependencies,
       libraryDependencies ++= slickDependencies,
       libraryDependencies += mysql,
-      libraryDependencies += json4sNative
+      libraryDependencies += json4sNative,
+      libraryDependencies += reactiveMongo
     )
   )
 
