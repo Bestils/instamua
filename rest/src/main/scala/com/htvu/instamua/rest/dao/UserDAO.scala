@@ -1,6 +1,6 @@
-package com.htvu.instamua.user.dao
+package com.htvu.instamua.rest.dao
 
-import com.htvu.instamua.user.dao.Relationship._
+import com.htvu.instamua.rest.dao.Relationship._
 import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.{ExecutionContext, Future}

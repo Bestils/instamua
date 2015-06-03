@@ -1,4 +1,4 @@
-package com.htvu.instamua.user.dao
+package com.htvu.instamua.rest.dao
 
 import scala.concurrent.Future
 

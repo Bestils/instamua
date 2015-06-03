@@ -1,12 +1,12 @@
-package com.htvu.instamua.user.api.services
+package com.htvu.instamua.rest.api.services
 
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
-import com.htvu.instamua.user.api.JsonFormats
-import com.htvu.instamua.user.core.UserActor
-import com.htvu.instamua.user.dao.Relationship.Relationship
-import com.htvu.instamua.user.dao._
+import com.htvu.instamua.rest.api.JsonFormats
+import com.htvu.instamua.rest.core.UserActor
+import com.htvu.instamua.rest.dao.Relationship.Relationship
+import com.htvu.instamua.rest.dao._
 import spray.http.MediaTypes.`application/json`
 import spray.routing.Directives
 

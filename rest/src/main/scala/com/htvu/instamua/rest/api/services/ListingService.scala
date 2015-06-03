@@ -1,7 +1,7 @@
-package com.htvu.instamua.user.api.services
+package com.htvu.instamua.rest.api.services
 
 import akka.actor.ActorSystem
-import com.htvu.instamua.user.api.JsonFormats
+import com.htvu.instamua.rest.api.JsonFormats
 import spray.routing.Directives
 
 class ListingService()(implicit system: ActorSystem) extends Directives with JsonFormats {

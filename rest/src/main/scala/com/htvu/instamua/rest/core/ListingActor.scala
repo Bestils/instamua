@@ -1,8 +1,8 @@
-package com.htvu.instamua.user.core
+package com.htvu.instamua.rest.core
 
 import akka.actor.{Actor, Props}
 import akka.pattern.pipe
-import com.htvu.instamua.user.dao._
+import com.htvu.instamua.rest.dao._
 
 
 object ListingActor {

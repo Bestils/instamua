@@ -1,9 +1,9 @@
-package com.htvu.instamua.user
+package com.htvu.instamua.rest
 
 import akka.actor.{ActorRefFactory, ActorSystem}
 import akka.io.IO
-import com.htvu.instamua.user.api.RoutedHttpService
-import com.htvu.instamua.user.api.services.UserService
+import com.htvu.instamua.rest.api.RoutedHttpService
+import com.htvu.instamua.rest.api.services.UserService
 import com.typesafe.config.ConfigFactory
 import spray.can.Http
 import spray.routing.HttpService

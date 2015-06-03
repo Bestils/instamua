@@ -1,4 +1,4 @@
-package com.htvu.instamua.user.api
+package com.htvu.instamua.rest.api
 
 import akka.actor.{Props, ActorContext, Actor, ActorLogging}
 import spray.http.StatusCodes._

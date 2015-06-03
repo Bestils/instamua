@@ -17,7 +17,7 @@ object Build extends Build {
     id = "root",
     base = file("."),
     settings = buildSettings
-  ) aggregate(authentication, user, listing, chat)
+  ) aggregate(authentication, rest, chat)
 
   lazy val authentication = Project(
     id = "auth",
@@ -26,9 +26,9 @@ object Build extends Build {
     )
   )
 
-  lazy val user = Project(
-    id = "user",
-    base = file("user"),
+  lazy val rest = Project(
+    id = "rest",
+    base = file("rest"),
     settings = buildSettings ++ Seq(
       libraryDependencies ++= akkaDependencies,
       libraryDependencies ++= sprayDependencies,
@@ -36,13 +36,6 @@ object Build extends Build {
       libraryDependencies += mysql,
       libraryDependencies += json4sNative,
       libraryDependencies += reactiveMongo
-    )
-  )
-
-  lazy val listing = Project(
-    id = "listing",
-    base = file("listing"),
-    settings = buildSettings ++ Seq(
     )
   )
 

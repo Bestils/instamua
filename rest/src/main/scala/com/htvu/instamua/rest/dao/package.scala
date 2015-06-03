@@ -1,4 +1,4 @@
-package com.htvu.instamua.user
+package com.htvu.instamua.rest
 
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import org.joda.time.DateTime

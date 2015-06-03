@@ -1,4 +1,4 @@
-package com.htvu.instamua.user.api
+package com.htvu.instamua.rest.api
 
 import spray.httpx.Json4sSupport
 
