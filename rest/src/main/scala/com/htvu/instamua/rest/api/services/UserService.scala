@@ -9,6 +9,7 @@ import com.htvu.instamua.rest.dao.Relationship.Relationship
 import com.htvu.instamua.rest.dao._
 import spray.http.MediaTypes.`application/json`
 import spray.routing.Directives
+import akka.event.slf4j.SLF4JLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Try}
@@ -37,7 +38,9 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
             (userActor ? GetUserInfo(userId)).mapTo[Option[User]] onComplete {
               case Success(userOption) => userOption match {
                 case None => ctx complete """{"error": "user not found"}"""
-                case Some(user) => ctx complete user
+                case Some(user) => {
+                  ctx complete user
+                }
               }
               case _ => ctx complete """{"error": "Some thing is wrong"}"""
             }
