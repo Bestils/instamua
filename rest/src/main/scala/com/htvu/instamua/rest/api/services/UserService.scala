@@ -9,7 +9,6 @@ import com.htvu.instamua.rest.dao.Relationship.Relationship
 import com.htvu.instamua.rest.dao._
 import spray.http.MediaTypes.`application/json`
 import spray.routing.Directives
-import akka.event.slf4j.SLF4JLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Try}

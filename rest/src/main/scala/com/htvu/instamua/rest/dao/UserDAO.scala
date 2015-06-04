@@ -6,7 +6,6 @@ import spray.util.LoggingContext
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
-import akka.event.slf4j.SLF4JLogging
 import akka.actor.{ActorLogging}
 
 object UserDAO{
