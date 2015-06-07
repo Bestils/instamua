@@ -4,11 +4,13 @@ import akka.actor.{Actor, Props}
 import akka.pattern.pipe
 import com.htvu.instamua.rest.dao._
 
+import scala.concurrent.ExecutionContext
+
 
 object ListingActor {
   case class NewListing(listing: Listing)
   case class GetListing(listingId: String)
-  case class UpdateListing(listingId: String, listing: Listing)
+  case class UpdateListing(listingId: String, updated: ListingDetail)
   case class DeleteListing(listingId: String)
 
   case class GetComments(listingId: String)
@@ -18,44 +20,45 @@ object ListingActor {
 
   case class GetLikes(listingId: String)
   case class NewLike(listingId: String, like: Like)
-  case class UnLike(listingId: String, likeId: Long)
+  case class UnLike(listingId: String, likeId: String)
 
   case class SearchListing(query: String)
 
-  def props(): Props = Props(new UserActor())
+  def props(): Props = Props(new ListingActor())
 }
 
-class ListingActor extends Actor {
-  implicit val exec = context.dispatcher
-
+class ListingActor extends Actor with ListingDAO {
   import ListingActor._
 
   def receive: Receive = {
     case NewListing(listing) =>
-      ListingDAO.createNewListing(listing) pipeTo sender
+      createNewListing(listing) pipeTo sender
     case GetListing(listingId) =>
-      ListingDAO.getListing(listingId) pipeTo sender
-    case UpdateListing(listingId, listing) =>
-      ListingDAO.updateListing(listingId, listing) pipeTo sender
+      println(listingId)
+      getListing(listingId) pipeTo sender
+    case UpdateListing(listingId, updated) =>
+      updateListing(listingId, updated) pipeTo sender
     case DeleteListing(listingId) =>
-      ListingDAO.deleteListing(listingId) pipeTo sender
+      deleteListing(listingId) pipeTo sender
     case GetComments(listingId) =>
-      ListingDAO.getComments(listingId) pipeTo sender
+      getComments(listingId) pipeTo sender
     case NewComment(listingId, comment) =>
-      ListingDAO.createNewComment(listingId, comment) pipeTo sender
+      createNewComment(listingId, comment) pipeTo sender
     case UpdateComment(listingId, comment) =>
-      ListingDAO.updateComment(listingId, comment) pipeTo sender
+      updateComment(listingId, comment) pipeTo sender
     case DeleteComment(listingId, commentId) =>
-      ListingDAO.deleteComment(listingId, commentId) pipeTo sender
+      deleteComment(listingId, commentId) pipeTo sender
     case GetLikes(listingId) =>
-      ListingDAO.getLikes(listingId) pipeTo sender
+      getLikes(listingId) pipeTo sender
     case NewLike(listingId, like) =>
-      ListingDAO.createNewLike(listingId, like) pipeTo sender
+      createNewLike(listingId, like) pipeTo sender
     case UnLike(listingId, likeId) =>
-      ListingDAO.unlike(listingId, likeId) pipeTo sender
+      unlike(listingId, likeId) pipeTo sender
     case SearchListing(query) =>
-      ListingDAO.search(query) pipeTo sender
+      search(query) pipeTo sender
   }
+
+  implicit def executionContext: ExecutionContext = context.dispatcher
 }
 
 

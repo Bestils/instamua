@@ -2,6 +2,7 @@ package com.htvu.instamua.rest
 
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import org.joda.time.DateTime
+import reactivemongo.bson._
 import slick.driver.MySQLDriver.api._
 
 package object dao {
@@ -105,27 +106,57 @@ package object dao {
     val NO_REL, A_TO_B, A_TO_B_BOTH, B_TO_A, B_TO_A_BOTH = Value
   }
 
-  case class Listing(
-                    id: String,
-                    category: String,
-                    price: Float,
-                    title: String,
-                    description: Option[String],
-                    location: String,
-                    comments: Seq[Comment],
-                    likes: Seq[Like]
-                    )
+  implicit object BSONDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {
+    def read(time: BSONDateTime) = new DateTime(time.value)
+    def write(jdtime: DateTime) = BSONDateTime(jdtime.getMillis)
+  }
+
   case class Comment(
-                    id: String,
+                    id: Option[String],
                     text: String,
                     userId: Int,
                     username: String,
-                    createdAt: DateTime,
                     profilePicture: String
                     )
-  case class Like(
-                 id: String,
+  implicit val commentFormat = Macros.handler[Comment]
+
+  case class Like(id: Option[String],
                  userId: Int,
                  username: String
                  )
+
+  implicit val likeFormat = Macros.handler[Like]
+
+  case class ListingDetail(
+                          category: String,
+                          price: Double,
+                          title: String,
+                          description: Option[String],
+                          location: String
+                          )
+
+  implicit val listingDetailFormat = Macros.handler[ListingDetail]
+
+  case class Listing(
+                      _id: Option[BSONObjectID],
+                      details: ListingDetail,
+                      comments: List[Comment],
+                      likes: List[Like],
+                      pictures: List[String]
+                      )
+
+  implicit val listingFormat = Macros.handler[Listing]
+
+  case class CommentProjection(
+                            id: Option[String],
+                            comments: List[Comment]
+                            )
+
+  implicit val commentProjFormat = Macros.handler[CommentProjection]
+
+  case class LikeProjection(
+                         id: Option[String],
+                         likes: List[Like]
+                         )
+  implicit val likeProjFormat = Macros.handler[LikeProjection]
 }
