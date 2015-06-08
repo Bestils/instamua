@@ -3,25 +3,95 @@ package com.htvu.instamua.rest
 import akka.actor.{ActorRefFactory, ActorSystem}
 import akka.io.IO
 import com.htvu.instamua.rest.api.RoutedHttpService
-import com.htvu.instamua.rest.api.services.{ListingService, UserService}
+import com.htvu.instamua.rest.api.services.{ListingService, UserService, AuthService}
 import com.typesafe.config.ConfigFactory
 import spray.can.Http
 import spray.routing.HttpService
+import spray.http.CacheDirectives._
+import spray.http.HttpHeaders._
+import akka.actor._
+import spray.http.StatusCodes._
+import spray.routing._
+import com.htvu.instamua.rest.util._
 
-
-
-trait BootedCore extends HttpService {
-  implicit val system = ActorSystem("user-services")
-
-  private val userService = new UserService()
-  private val listingService = new ListingService()
-
-  val routes = {
-    pathPrefix("api" / "v1") {
-      userService.routes ~
-      listingService.routes
+//some static page directives
+trait PageDirectives extends Directives with ActorRefFactoryProvider {
+  def completeWithNotFoundPage(): Route = {
+    respondWithStatus(NotFound) {
+      getFromResource("statics/errors/404.html")
     }
   }
+
+  def completeWithInternalServerErrorPage(): Route = {
+    respondWithStatus(InternalServerError) {
+      getFromResource("statics/errors/500.html")
+    }
+  }
+}
+
+//Just to serve some static files for error, etc...
+//also forward static routes like NodeJS etc (to show error in browser)
+trait WebsiteRoutes extends HttpService with PageDirectives {
+  //serve static file from certain root
+  val websiteRoutes = {
+    handleExceptions(WebsiteExceptionHandler) {
+      handleRejections(WebsiteRejectionHandler) {
+        getFromResourceDirectory("statics")
+      }
+    }
+  }
+
+  //rejection handler for static website
+  val WebsiteRejectionHandler = RejectionHandler {
+    case Nil ⇒ completeWithNotFoundPage()
+    case _   ⇒ completeWithInternalServerErrorPage()
+  }
+  
+  //exception handler
+  val WebsiteExceptionHandler = ExceptionHandler {
+    case _ ⇒ completeWithInternalServerErrorPage()
+  }
+}
+
+//API Routes vs WebsiteRoutes separatedly
+trait ApiRoutes extends HttpService {
+  implicit val system = ActorSystem("user-services")
+  
+  private val userService = new UserService()
+  private val listingService = new ListingService()
+  private val authService = new AuthService()
+  
+  //different rejection and exception handling go here
+  //TODO: custom rejection handler REST format
+  val ApiRejectionHandler = RejectionHandler.Default
+  val noCachingAllowed = respondWithHeaders(RawHeader("Pragma", "no-cache"), `Cache-Control`(`no-store`))
+
+  val apiRoutes = {
+    pathPrefix("api" / "v1") {
+      handleRejections(ApiRejectionHandler) {
+        noCachingAllowed {
+            userService.routes ~
+              authService.routes ~
+              listingService.routes
+         
+        }
+      }
+    }
+  }
+
+  val decompressCompressIfRequested = (decompressRequest() & compressResponseIfRequested())
+}
+
+trait BootedCore extends HttpService with ApiRoutes with WebsiteRoutes with HttpsDirectives with SettingsProvider{
+  //merge both routes together + enforce https if needed
+  val routes = {
+    decompressCompressIfRequested {
+      enforceHttpsIf(settings.Http.EnforceHttps) {
+        apiRoutes ~ websiteRoutes
+      }
+    }
+  }
+  
   val rootService = system.actorOf(RoutedHttpService.props(routes), "root-service")
 
   IO(Http)(system) ! Http.Bind(rootService, "0.0.0.0", 8080)
