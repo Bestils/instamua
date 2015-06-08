@@ -1,4 +1,4 @@
 .idea/
 target/
 **/target/
-rest/src/main/resorces/application.conf
+rest/src/main/resources/application.conf
