@@ -29,9 +29,41 @@ trait PageDirectives extends Directives with ActorRefFactoryProvider {
   }
 }
 
-//Just to serve some static files for error, etc...
-//also forward static routes like NodeJS etc (to show error in browser)
-trait WebsiteRoutes extends HttpService with PageDirectives {
+trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider with PageDirectives{
+  implicit val system = ActorSystem("user-services")
+
+  private val userService = new UserService()
+  private val listingService = new ListingService()
+  private val authService = new AuthService()
+
+  //different rejection and exception handling go here
+  //TODO: custom rejection handler REST format
+  val ApiRejectionHandler = RejectionHandler.Default
+  val noCachingAllowed = respondWithHeaders(RawHeader("Pragma", "no-cache"), `Cache-Control`(`no-store`))
+
+  //rejection handler for static website
+  val WebsiteRejectionHandler = RejectionHandler {
+    case Nil ⇒ completeWithNotFoundPage()
+    case _   ⇒ completeWithInternalServerErrorPage()
+  }
+
+  //exception handler
+  val WebsiteExceptionHandler = ExceptionHandler {
+    case _ ⇒ completeWithInternalServerErrorPage()
+  }
+  
+  val apiRoutes = {
+    pathPrefix("api" / "v1") {
+      handleRejections(ApiRejectionHandler) {
+        noCachingAllowed {
+          userService.routes ~
+            authService.routes ~
+            listingService.routes
+
+        }
+      }
+    }
+  }
   //serve static file from certain root
   val websiteRoutes = {
     handleExceptions(WebsiteExceptionHandler) {
@@ -41,48 +73,8 @@ trait WebsiteRoutes extends HttpService with PageDirectives {
     }
   }
 
-  //rejection handler for static website
-  val WebsiteRejectionHandler = RejectionHandler {
-    case Nil ⇒ completeWithNotFoundPage()
-    case _   ⇒ completeWithInternalServerErrorPage()
-  }
-  
-  //exception handler
-  val WebsiteExceptionHandler = ExceptionHandler {
-    case _ ⇒ completeWithInternalServerErrorPage()
-  }
-}
-
-//API Routes vs WebsiteRoutes separatedly
-trait ApiRoutes extends HttpService {
-  implicit val system = ActorSystem("user-services")
-  
-  private val userService = new UserService()
-  private val listingService = new ListingService()
-  private val authService = new AuthService()
-  
-  //different rejection and exception handling go here
-  //TODO: custom rejection handler REST format
-  val ApiRejectionHandler = RejectionHandler.Default
-  val noCachingAllowed = respondWithHeaders(RawHeader("Pragma", "no-cache"), `Cache-Control`(`no-store`))
-
-  val apiRoutes = {
-    pathPrefix("api" / "v1") {
-      handleRejections(ApiRejectionHandler) {
-        noCachingAllowed {
-            userService.routes ~
-              authService.routes ~
-              listingService.routes
-         
-        }
-      }
-    }
-  }
-
   val decompressCompressIfRequested = (decompressRequest() & compressResponseIfRequested())
-}
-
-trait BootedCore extends HttpService with ApiRoutes with WebsiteRoutes with HttpsDirectives with SettingsProvider{
+  
   //merge both routes together + enforce https if needed
   val routes = {
     decompressCompressIfRequested {
@@ -92,6 +84,7 @@ trait BootedCore extends HttpService with ApiRoutes with WebsiteRoutes with Http
     }
   }
   
+  //TODO: change wrapper of route so that different exception/rejection handlers for API vs Static Routes
   val rootService = system.actorOf(RoutedHttpService.props(routes), "root-service")
 
   IO(Http)(system) ! Http.Bind(rootService, "0.0.0.0", 8080)
