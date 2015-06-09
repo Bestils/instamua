@@ -8,7 +8,7 @@ import org.json4s._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization.{read, write}
 import spray.routing._
-
+import spray.routing.se
 
 class AuthService()(implicit system: ActorSystem) extends Directives{
   import scala.concurrent.duration._
