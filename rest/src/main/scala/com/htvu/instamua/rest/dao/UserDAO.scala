@@ -2,14 +2,14 @@ package com.htvu.instamua.rest.dao
 
 import com.htvu.instamua.rest.dao.Relationship._
 import slick.driver.MySQLDriver.api._
+import spray.util.LoggingContext
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
+import akka.actor.{ActorLogging}
 
-
-object UserDAO {
+object UserDAO{
   val db = Database.forConfig("jdbc")
-
 
   val users = TableQuery[Users]
   val userPrivateInfos = TableQuery[UserPrivateInfos]
@@ -19,8 +19,10 @@ object UserDAO {
 
   def createNewUser(userInfo: UserRegistrationInfo): Future[User] = ???
 
-  def getUserInfo(userId: Int): Future[Option[User]] =
+  def getUserInfo(userId: Int)(implicit log: LoggingContext): Future[Option[User]] = {
+    log.debug("running here")
     db.run(users.filter(_.id === userId).take(1).result.headOption)
+  }
 
 
   def getUserPrivateInfo(userId: Int): Future[Option[UserPrivateInfo]] =

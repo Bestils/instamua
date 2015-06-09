@@ -35,7 +35,9 @@ object Build extends Build {
       libraryDependencies ++= slickDependencies,
       libraryDependencies += mysql,
       libraryDependencies += json4sNative,
-      libraryDependencies += reactiveMongo
+      libraryDependencies += reactiveMongo,
+      libraryDependencies += reactiveRedis,
+      libraryDependencies += "net.ceedubs" %% "ficus" % "1.1.2"
     )
   )
 
