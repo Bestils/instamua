@@ -4,25 +4,20 @@ import akka.actor.ActorRefFactory
 import akka.util.Timeout
 
 import com.redis.RedisClient
-import com.redis.serialization.SprayJsonSupport._
+import com.redis.serialization.DefaultFormats._
+import com.redis.serialization._
+import spray.json.JsonFormat
 import com.redis.serialization.DefaultFormats._
 
-import spray.json.JsonFormat
-import spray.json.DefaultJsonProtocol._
-
 import com.typesafe.config.Config
-
-import java.util.concurrent.TimeUnit
-
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 import spray.http.{DateTime, HttpCookie}
 
 class RedisSessionManager[T](config: Config)(
   implicit system: ActorRefFactory,
   timeout: Timeout,
-  format: JsonFormat[T])
+  format: Format[T])
   extends StatefulSessionManager[T](config) {
 
   import system.dispatcher
@@ -32,22 +27,17 @@ class RedisSessionManager[T](config: Config)(
       host = config.getString("spray.routing.session.redis.host"),
       port = config.getInt("spray.routing.session.redis.port"))
 
+  //create a new sid and save into redis
   def start(): Future[String] = {
     val id = newSid
+    
     for {
-      true <- client.set(id, Map.empty[String, T])
+      true <- client.set(id, "")
       true <- client.expire(id, sessionTimeout.toSeconds.toInt)
     } yield id
   }
 
-  def get(id: String): Future[Option[Map[String, T]]] =
-    client.get[Map[String, T]](id).flatMap {
-      case Some(map) =>
-        client.expire(id, sessionTimeout.toSeconds.toInt).map(_ => Some(map))
-      case None =>
-        Future.successful(None)
-    }
-
+  //check if key exist
   def isValid(id: String): Future[Boolean] =
     client.exists(id).flatMap {
       case true =>
@@ -56,18 +46,32 @@ class RedisSessionManager[T](config: Config)(
         Future.successful(false)
     }
 
-  def update(id: String, map: Map[String, T]): Future[Unit] =
-    client.set(id, map).flatMap {
+  //get SessionData from cookies
+  def get(id: String): Future[Option[T]] = {
+    client.get[T](id).flatMap {
+      case Some(sessionObj) =>
+        client.expire(id, sessionTimeout.toSeconds.toInt).map(_ => Some(sessionObj))
+      case None =>
+        Future.successful(None)
+    }
+  }
+
+  //update or set SessionData from cookie
+  def update(id: String, sessionObj: T): Future[Unit] =  {
+    client.set(id, sessionObj).flatMap {
       case true =>
         client.expire(id, sessionTimeout.toSeconds.toInt).map(_ => ())
       case false =>
         Future.successful(())
     }
+  }
 
+  //just delete the session from redis
   def invalidate(id: String): Future[Unit] =
     for(1 <- client.del(id))
     yield ()
 
+  //generate cookie for current request
   def cookify(id: String): Future[HttpCookie] =
     for(maxAge <- client.ttl(id))
     yield
@@ -81,7 +85,7 @@ class RedisSessionManager[T](config: Config)(
         HttpCookie(name = cookieName, content = id, maxAge = Some(maxAge), path = cookiePath, domain = cookieDomain, secure = cookieSecure, httpOnly = cookieHttpOnly )
 
   /** This operation is not supported for Redis session manager */
-  def onInvalidate(callback: (String, Map[String, T]) => Unit): Unit =
+  def onInvalidate(callback: (String, T) => Unit): Unit =
     throw new UnsupportedOperationException("Redis session manager does not support invalidate callbacks")
 
   def shutdown(): Unit =

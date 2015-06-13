@@ -17,9 +17,9 @@ package object dao {
                    location: Option[String],
                    bio: Option[String],
                    website: Option[String],
-                   profilePicture: Option[String]
+                   profilePicture: Option[String],
+                   roleId: Option[Int]
                    )
-
 
   class Users(tag: Tag) extends Table[User](tag, "user") {
     def id = column[Int]("user_id", O.PrimaryKey, O.AutoInc)
@@ -29,10 +29,19 @@ package object dao {
     def bio = column[String]("bio")
     def webSite = column[String]("web_site")
     def profilePicture = column[String]("profile_picture")
-
-    def * = (id, username, fullName.?, location.?, bio.?, webSite.?, profilePicture.?) <> (User.tupled, User.unapply)
+    def roleId = column[Int]("role_id")
+    
+    def * = (id, username, fullName.?, location.?, bio.?, webSite.?, profilePicture.?, roleId.?) <> (User.tupled, User.unapply)
   }
 
+  //one user can have multiple roles
+  object RoleType extends Enumeration {
+    type Role = Value
+    val USER, ADMIN, SUPERADMIN = Value
+  }
+
+  case class Role(id: Int, description: String)
+  
   case class UserRegistrationInfo(
                                    username: String,
                                    passwd: String,

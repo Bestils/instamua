@@ -19,23 +19,28 @@ import shapeless._
 
 import scala.language.implicitConversions
 
+//trait contains list of session directives
 trait StatefulSessionManagerDirectives[T] extends BasicDirectives with CookieDirectives with RouteDirectives {
-  def session(magnet: WithStatefulManagerMagnet[String, T]): Directive1[Option[Map[String, T]]] =
+  //get current session
+  def session(magnet: WithStatefulManagerMagnet[String, T]): Directive1[Option[T]] =
     magnet.directive(_.get(magnet.in))
 
+  //start with fresh session
   def newSession(magnet: WithStatefulManagerMagnet[Unit, T]): Directive1[String] =
     magnet.directive(_.start())
 
-  def updateSession(magnet: WithStatefulManagerMagnet[(String, Map[String, T]), T]): Directive0 =
+  //update by setting key-value and allow pass
+  def updateSession(magnet: WithStatefulManagerMagnet[(String, T), T]): Directive0 =
     magnet.directive(_.update(magnet.in._1, magnet.in._2)).hflatMap(_ => pass)
 
+  //just remove session and allow pass
   def invalidateSession(magnet: WithStatefulManagerMagnet[String, T]): Directive0 =
     magnet.directive(_.invalidate(magnet.in)).hflatMap(_ => pass)
 
-  /** Gets the current session givven by the cookie if any.
+  /** Gets the current session given by the cookie if any.
    *  If no session cookie exists, a new session is started and returned.
    *  If an invalid or expired session identifier is given, the request is rejected */
-  def cookieSession(magnet: WithStatefulManagerMagnet[Unit, T]): Directive[String :: Map[String, T] :: HNil] =
+  def cookieSession(magnet: WithStatefulManagerMagnet[Unit, T]): Directive[String :: T :: HNil] =
     optionalCookie(magnet.manager.cookieName).hflatMap {
       case Some(cookie) :: HNil =>
         magnet.directive(_.get(cookie.content)).hflatMap {
@@ -55,7 +60,7 @@ trait StatefulSessionManagerDirectives[T] extends BasicDirectives with CookieDir
 
     }
 
-  private def startFresh(magnet: WithStatefulManagerMagnet[Unit, T]): Directive[String :: Map[String, T] :: HNil] =
+  private def startFresh(magnet: WithStatefulManagerMagnet[Unit, T]): Directive[String :: T :: HNil] =
       magnet.directive(_.start()).hflatMap {
         case id :: HNil =>
           magnet.directive(_.get(id)).hflatMap {
@@ -72,8 +77,8 @@ trait StatefulSessionManagerDirectives[T] extends BasicDirectives with CookieDir
       }
 
   def setCookieSession(magnet: WithStatefulManagerMagnet[String, T]): Directive0 =
-    magnet.directive(_.cookify(magnet.in)).hflatMap {
-      case cookie :: HNil => setCookie(cookie)
+    magnet.directive(_.cookify(magnet.in)).flatMap {
+      case cookie => setCookie(cookie)
     }
 
 }
