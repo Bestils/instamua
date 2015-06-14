@@ -17,6 +17,10 @@ class Settings(system: ExtendedActorSystem) extends Extension {
   }
   
   //Other settings go here
+  object Session {
+    val CookieSessionName:String = config.as[String]("spray.routing.session.cookie.name")
+    val CookieCSRFName:String = config.as[String]("spray.routing.session.cookie.csrfName")
+  }
 }
 
 trait SettingsProvider extends ActorRefFactoryProvider {

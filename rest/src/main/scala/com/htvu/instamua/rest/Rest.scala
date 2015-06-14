@@ -48,7 +48,8 @@ trait PageDirectives extends Directives with ActorRefFactoryProvider {
 
 trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider with PageDirectives{
   implicit val system = ActorSystem("user-services")
-
+  implicit def actorRefFactory: ActorRefFactory = system
+  
   private val userService = new UserService()
   private val listingService = new ListingService()
   private val authService = new AuthService()
@@ -107,8 +108,6 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
   val rootService = system.actorOf(RoutedHttpService.props(routes), "root-service")
 
   IO(Http)(system) ! Http.Bind(rootService, "0.0.0.0", 8080)
-
-  implicit def actorRefFactory: ActorRefFactory = system
 }
 
 object Configs {
