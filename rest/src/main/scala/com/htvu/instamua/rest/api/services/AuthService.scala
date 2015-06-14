@@ -22,7 +22,7 @@ import scala.concurrent._
 
 
 //StatefulSessionManagerDirectives[SessionData] with JsonSessionFormat
-class AuthService()(implicit system: ActorSystem) extends Directives with SessionCookieAuthenticatorProvider{
+class AuthService()(implicit system: ActorSystem) extends Directives with SessionCookieAuthenticatorProvider with SessionCookieAuthorizationProvider{
   implicit def actorRefFactory: ActorRefFactory = system
   implicit val ec = system.dispatcher
   
@@ -31,10 +31,11 @@ class AuthService()(implicit system: ActorSystem) extends Directives with Sessio
       pathPrefix("login"){
         pathEnd {
           get {
-            val sessionData = SessionData(Some(User(1, "sa", None, None, None, None, None, None)), None)
+            val userRoles: List[Role] = List(Role(1, "admin"), Role(2, "user"))
+            val sessionData = SessionData(Some(User(1, "sa", None, None, None, None, None, None)), Some(userRoles))
+            
             updateSession(id, sessionData) {
               session(id) { sessionObj =>
-                println(sessionObj)
                 complete {
                   <h1>Say hello to spray</h1>
                 }
@@ -46,9 +47,11 @@ class AuthService()(implicit system: ActorSystem) extends Directives with Sessio
     } ~
     path("restricted"){
       authenticate(SessionCookieAuthenticator) { session ⇒
-        pathEnd {
-          complete {
-            <h1>Restricted Zone</h1>
+        authorize(withRole(RoleType.ADMIN.id, session)) {
+          pathEnd {
+            complete {
+              <h1>Restricted Zone</h1>
+            }
           }
         }
       }

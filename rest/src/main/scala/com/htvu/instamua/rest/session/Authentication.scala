@@ -12,7 +12,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 //what you want to store in the session
-case class SessionData(user: Option[User], role: Option[Role])
+case class SessionData(user: Option[User], role: Option[List[Role]])
 
 abstract class Authenticator extends ContextAuthenticator[SessionData] {
   /**
