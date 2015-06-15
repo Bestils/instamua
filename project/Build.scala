@@ -1,11 +1,10 @@
 import sbt.Keys._
 import sbt._
 import ExternalDependencies._
-
-
+import com.github.bigtoast.sbtliquibase.LiquibasePlugin._
+import LiquibaseConfig._
 
 object Build extends Build {
-
   private val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.htvu",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-target:jvm-1.7"),
@@ -26,6 +25,8 @@ object Build extends Build {
     )
   )
 
+  //liquibase.core 3.x won't work with this plugin so use 2.0.5 for now
+  //TODO: check to upgrade liquibase-core to 3.x and use newer plugin
   lazy val rest = Project(
     id = "rest",
     base = file("rest"),
@@ -37,7 +38,14 @@ object Build extends Build {
       libraryDependencies += json4sNative,
       libraryDependencies += reactiveMongo,
       libraryDependencies += reactiveRedis,
-      libraryDependencies += "net.ceedubs" %% "ficus" % "1.1.2"
+      libraryDependencies += "net.ceedubs" %% "ficus" % "1.1.2",
+      libraryDependencies += "org.liquibase" % "liquibase-core" % "2.0.5"
+    ) ++ liquibaseSettings ++ Seq (
+      liquibaseUsername := liquibaseUsernameS,
+      liquibasePassword := liquibasePasswordS,
+      liquibaseDriver   := liquibaseDriverS,
+      liquibaseUrl      := liquibaseUrlS,
+      liquibaseChangelog := liquibaseChangelogS
     )
   )
 
@@ -47,5 +55,4 @@ object Build extends Build {
     settings = buildSettings ++ Seq(
     )
   )
-
 }

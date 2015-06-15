@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-1">
+        <createTable tableName="follower">
+            <column name="user_id" type="INT UNSIGNED"/>
+            <column name="follower_id" type="INT UNSIGNED"/>
+            <column name="follow_back" type="BIT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-2">
+        <createTable tableName="user">
+            <column autoIncrement="true" name="user_id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="username" type="VARCHAR(30)"/>
+            <column name="full_name" type="VARCHAR(50)"/>
+            <column name="location" type="VARCHAR(20)"/>
+            <column name="bio" type="VARCHAR(300)"/>
+            <column name="web_site" type="VARCHAR(50)"/>
+            <column name="profile_picture" type="TEXT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-3">
+        <createTable tableName="user_private_info">
+            <column name="user_id" type="INT UNSIGNED"/>
+            <column name="passwd" type="CHAR(60)"/>
+            <column name="salt" type="VARCHAR(60)"/>
+            <column name="email" type="VARCHAR(30)"/>
+            <column name="gender" type="TINYINT UNSIGNED"/>
+            <column name="profile_picture" type="TEXT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-4">
+        <addForeignKeyConstraint baseColumnNames="follower_id" baseTableName="follower" baseTableSchemaName="instamua" constraintName="follower_follower_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencedTableSchemaName="instamua" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-5">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="follower" baseTableSchemaName="instamua" constraintName="follower_user_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencedTableSchemaName="instamua" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-6">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_private_info" baseTableSchemaName="instamua" constraintName="user_private_info_user_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencedTableSchemaName="instamua" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-7">
+        <createIndex indexName="username" tableName="user" unique="true">
+            <column name="username"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="xuan_tuong (generated)" id="1434381489970-8">
+        <createTable tableName="role">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="description" type="VARCHAR(30)"/>
+        </createTable>
+
+        <addColumn tableName="user">
+            <column name="role_id" type="INT UNSIGNED"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -11,7 +11,9 @@ object RepositoryResolvers {
     "Sonatype OSS Repo (Snapshots)" at "http://oss.sonatype.org/content/repositories/snapshots",
     "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
     "Maven Central" at "http://central.maven.org",
+    "mvnrepository" at "http://mvnrepository.com/artifact/",
     "spray repo" at "http://repo.spray.io",
-    "sbt-plugin-releases" at "http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases"
+    "sbt-plugin-releases" at "http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
+    "sonatype-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
   )
 }

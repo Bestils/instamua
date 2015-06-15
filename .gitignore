@@ -4,3 +4,4 @@ target/
 rest/src/main/resources/application.conf
 nodejs/node_modules
 nodejs/config.js
+project/LiquibaseConfig.scala

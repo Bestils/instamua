@@ -1,0 +1,19 @@
+Create a file name LiquibaseConfig.scala in the same directory with sample config like the following
+Because this file is different for different computer setting, we put it under .gitignore
+
+import sbt._
+
+object LiquibaseConfig {
+  val liquibaseUsernameS = "root"
+  val liquibasePasswordS = "root"
+  val liquibaseDriverS   = "com.mysql.jdbc.Driver"
+  val liquibaseUrlS      = "jdbc:mysql://localhost:3306/instamua?createDatabaseIfNotExist=true"
+  val liquibaseChangelogS = "./rest/liquibase/master.xml"
+}
+
+
+*How to run:
+It's possible to migrate existing database, but for now, easiest way is run:
+sbt rest/liquibaseDropAll => drop the schema
+sbt rest/liquibaseUpdate => sync the schema
+Any later change, adding into the rest/liquibase/master.xml with author, id(increasing) and run the liquibaseUpdate
