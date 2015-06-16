@@ -133,7 +133,6 @@ package object dao {
                  userId: Int,
                  username: String
                  )
-
   implicit val likeFormat = Macros.handler[Like]
 
   case class ListingDetail(
@@ -143,8 +142,16 @@ package object dao {
                           description: Option[String],
                           location: String
                           )
-
   implicit val listingDetailFormat = Macros.handler[ListingDetail]
+
+  case class Image(url: String, width: Int, height: Int)
+  implicit val imageFormat = Macros.handler[Image]
+
+  case class Media(
+                    thumbnail: Option[Image] = None,
+                    standard: Option[Image] = None
+                    )
+  implicit val mediaFormat = Macros.handler[Media]
 
   case class Listing(
                       _id: Option[BSONObjectID],
@@ -153,14 +160,12 @@ package object dao {
                       likes: List[Like],
                       medias: List[Media]
                       )
-
   implicit val listingFormat = Macros.handler[Listing]
 
   case class CommentProjection(
                             id: Option[String],
                             comments: List[Comment]
                             )
-
   implicit val commentProjFormat = Macros.handler[CommentProjection]
 
   case class LikeProjection(
@@ -168,17 +173,4 @@ package object dao {
                          likes: List[Like]
                          )
   implicit val likeProjFormat = Macros.handler[LikeProjection]
-
-
-
-  case class Media(
-                    thumbnail: Option[Image] = None,
-                    standard: Option[Image] = None
-                    )
-
-  implicit val mediaFormat = Macros.handler[Media]
-
-  case class Image(url: String, width: Short, height: Short)
-
-  implicit val imageFormat = Macros.handler[Image]
 }

@@ -30,8 +30,8 @@ class MediaService()(implicit system: ActorSystem) extends Directives  with S3Se
 }
 
 trait S3Service {
-  private val IMAGE_STANDARD_WIDTH = 320.toShort
-  private val IMAGE_STANDARD_HEIGHT = 320.toShort
+  private val IMAGE_STANDARD_WIDTH = 320
+  private val IMAGE_STANDARD_HEIGHT = 320
 
   implicit val region = Region.AP_SOUTHEAST_1
   implicit val s3 = S3(Configs.config.getString("aws.access-key-id"), Configs.config.getString("aws.secret-access-key"))
