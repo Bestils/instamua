@@ -11,6 +11,9 @@ trait JsonFormats extends Json4sSupport {
   implicit def json4sFormats = org.json4s.DefaultFormats
 }
 
+object JsonFormats extends Json4sSupport {
+  implicit def json4sFormats = org.json4s.DefaultFormats
+}
 //special class for redis session serialization
 trait JsonSessionFormat {
   implicit val formats = Serialization.formats(NoTypeHints)
@@ -32,4 +35,5 @@ trait JsonSessionFormat {
 }
 
 object JsonSessionFormat extends JsonSessionFormat
+
 

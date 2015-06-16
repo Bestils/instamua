@@ -151,7 +151,7 @@ package object dao {
                       details: ListingDetail,
                       comments: List[Comment],
                       likes: List[Like],
-                      pictures: List[String]
+                      medias: List[Media]
                       )
 
   implicit val listingFormat = Macros.handler[Listing]
@@ -168,4 +168,17 @@ package object dao {
                          likes: List[Like]
                          )
   implicit val likeProjFormat = Macros.handler[LikeProjection]
+
+
+
+  case class Media(
+                    thumbnail: Option[Image] = None,
+                    standard: Option[Image] = None
+                    )
+
+  implicit val mediaFormat = Macros.handler[Media]
+
+  case class Image(url: String, width: Short, height: Short)
+
+  implicit val imageFormat = Macros.handler[Image]
 }

@@ -4,7 +4,7 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import akka.io.IO
 import akka.util.Timeout
 import com.htvu.instamua.rest.api.RoutedHttpService
-import com.htvu.instamua.rest.api.services.{ListingService, UserService, AuthService}
+import com.htvu.instamua.rest.api.services.{MediaService, ListingService, UserService, AuthService}
 import com.htvu.instamua.rest.session.{RedisSessionManager, StatefulSessionManagerDirectives}
 import com.typesafe.config.ConfigFactory
 import org.json4s.NoTypeHints
@@ -53,6 +53,7 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
   private val userService = new UserService()
   private val listingService = new ListingService()
   private val authService = new AuthService()
+  private val mediaService = new MediaService()
 
   //different rejection and exception handling go here
   //TODO: custom rejection handler REST format
@@ -75,9 +76,9 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
       handleRejections(ApiRejectionHandler) {
         noCachingAllowed {
           userService.routes ~
-            authService.routes ~
-            listingService.routes
-
+          authService.routes ~
+          listingService.routes ~
+          mediaService.routes
         }
       }
     }
@@ -111,10 +112,10 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
 }
 
 object Configs {
-  private val c = ConfigFactory.load()
+  val config = ConfigFactory.load()
 
-  val jdbc = c.getConfig("jdbc")
-  val mongo = c.getConfig("mongo")
+  val jdbc = config.getConfig("jdbc")
+  val mongo = config.getConfig("mongo")
 }
 
 object Rest extends App with BootedCore

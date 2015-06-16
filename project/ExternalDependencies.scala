@@ -31,4 +31,6 @@ object ExternalDependencies {
   val reactiveRedis = "net.debasishg" %% "redisreact" % "0.7"
 
   val mysql = "mysql" % "mysql-connector-java" % "5.1.35"
+
+  val awsScala = "com.github.seratch" %% "awscala" % "0.5.+"
 }
