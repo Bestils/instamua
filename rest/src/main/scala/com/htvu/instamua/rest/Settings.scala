@@ -5,6 +5,8 @@ import net.ceedubs.ficus.Ficus._
 
 import util._
 
+//This is only intended to be used in case we want to retrieve config from the external actor (or when we have ref to actorSystem)
+//TODO: check if we really need those following?
 object Settings extends ExtensionKey[Settings]
 
 class Settings(system: ExtendedActorSystem) extends Extension {
@@ -23,6 +25,8 @@ class Settings(system: ExtendedActorSystem) extends Extension {
   }
 }
 
+//allow access settings from implicit ActorRefFactory/ActorSystem;
+//just need to make sure the implicit ActorRefFactory is in scope of inheriting class
 trait SettingsProvider extends ActorRefFactoryProvider {
   lazy val settings: Settings = Settings(actorSystem)
 }

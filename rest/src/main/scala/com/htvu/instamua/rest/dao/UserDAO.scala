@@ -7,8 +7,9 @@ import spray.util.LoggingContext
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 import akka.actor.{ActorLogging}
+import com.typesafe.scalalogging.LazyLogging
 
-object UserDAO{
+object UserDAO extends LazyLogging{
   val db = Database.forConfig("jdbc")
 
   val users = TableQuery[Users]
@@ -16,14 +17,11 @@ object UserDAO{
   val userCredentials = TableQuery[UserCredentials]
   val followers = TableQuery[Followers]
 
-
   def createNewUser(userInfo: UserRegistrationInfo): Future[User] = ???
 
-  def getUserInfo(userId: Int)(implicit log: LoggingContext): Future[Option[User]] = {
-    log.debug("running here")
+  def getUserInfo(userId: Int): Future[Option[User]] = {
     db.run(users.filter(_.id === userId).take(1).result.headOption)
   }
-
 
   def getUserPrivateInfo(userId: Int): Future[Option[UserPrivateInfo]] =
     db.run(userPrivateInfos.filter(_.userId === userId).take(1).result.headOption)

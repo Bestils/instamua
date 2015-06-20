@@ -33,4 +33,9 @@ object ExternalDependencies {
   val mysql = "mysql" % "mysql-connector-java" % "5.1.35"
 
   val awsScala = "com.github.seratch" %% "awscala" % "0.5.+"
+  
+  val loggingDependencies = Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "ch.qos.logback" % "logback-classic" % "1.1.2"
+  )
 }

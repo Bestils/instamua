@@ -1,10 +1,12 @@
-package com.htvu.instamua.spray
+package com.htvu.instamua.test.spray
 
 import org.specs2.mutable.Specification
 import spray.testkit.Specs2RouteTest
 import spray.routing.HttpService
 import spray.http.StatusCodes._
 
+//Simple testClass for testing the Specification+Spec2Route Style
+//We will use both ScalaTest + Spec2
 class FullTestKitExampleSpec extends Specification with Specs2RouteTest with HttpService {
   def actorRefFactory = system // connect the DSL to the test ActorSystem
 

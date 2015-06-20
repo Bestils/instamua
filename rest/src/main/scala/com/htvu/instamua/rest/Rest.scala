@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 import akka.util.Timeout
 import akka.actor.ActorSystem
-
+import com.typesafe.scalalogging.LazyLogging
 import com.typesafe.config.ConfigFactory
 
 //some static page directives

@@ -3,9 +3,9 @@ package com.htvu.instamua.rest.core
 import akka.actor.{Actor, Props}
 import akka.pattern.pipe
 import com.htvu.instamua.rest.dao._
+import com.htvu.instamua.rest.util.ActorExecutionContextProvider
 
 import scala.concurrent.ExecutionContext
-
 
 object ListingActor {
   case class NewListing(listing: Listing)
@@ -27,7 +27,7 @@ object ListingActor {
   def props(): Props = Props(new ListingActor())
 }
 
-class ListingActor extends Actor with ListingDAO {
+class ListingActor extends Actor with ListingDAO with ActorExecutionContextProvider{
   import ListingActor._
 
   def receive: Receive = {
@@ -57,8 +57,6 @@ class ListingActor extends Actor with ListingDAO {
     case SearchListing(query) =>
       search(query) pipeTo sender
   }
-
-  implicit def executionContext: ExecutionContext = context.dispatcher
 }
 
 

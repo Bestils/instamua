@@ -1,8 +1,10 @@
 package com.htvu.instamua.rest.core
 
-import akka.actor.{Actor, Props}
+import akka.actor.{ActorLogging, Actor, Props}
 import akka.pattern.pipe
 import com.htvu.instamua.rest.dao._
+import com.htvu.instamua.rest.util._
+import com.typesafe.scalalogging.LazyLogging
 
 object UserActor {
   case class GetUserInfo(userId: Int)
@@ -19,9 +21,9 @@ object UserActor {
   def props(): Props = Props(new UserActor())
 }
 
-class UserActor extends Actor {
+//retrieve implicit execution context by mixin ActorExecutionContextProvider
+class UserActor extends Actor with ActorExecutionContextProvider{
   import UserActor._
-  implicit val exec = context.dispatcher
 
   def receive: Receive = {
     case RegisterNewUser(userInfo: UserRegistrationInfo) =>
