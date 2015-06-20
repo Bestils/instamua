@@ -1,15 +1,14 @@
 package com.htvu.instamua.rest.dao
 
 import com.htvu.instamua.rest.dao.Relationship._
+import com.typesafe.scalalogging.LazyLogging
 import slick.driver.MySQLDriver.api._
-import spray.util.LoggingContext
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
-import akka.actor.{ActorLogging}
-import com.typesafe.scalalogging.LazyLogging
 
 object UserDAO extends LazyLogging{
+  // TODO: convert this to a class
   val db = Database.forConfig("jdbc")
 
   val users = TableQuery[Users]

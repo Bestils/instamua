@@ -1,7 +1,6 @@
-package com.htvu.instamua.test.persistent
+package com.htvu.instamua.persistent
 
-import com.htvu.instamua.rest.dao._
-import com.htvu.instamua.rest.dao.UserDAO._
+import org.scalatest.{FlatSpec, MustMatchers}
 
 class DaoSpec extends FlatSpec with MustMatchers {
 
