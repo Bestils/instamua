@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata
 import com.htvu.instamua.rest.Configs
 import com.htvu.instamua.rest.api.JsonFormats
 import com.htvu.instamua.rest.dao.{Image, Media}
+import com.htvu.instamua.rest.util.ActorExecutionContextProvider
 import spray.http.{BodyPart, MultipartFormData}
 import spray.routing.Directives
 
@@ -66,7 +67,6 @@ class MediaController() extends Actor {
       val xs = x::done(h)
       done += h -> xs
       if (xs.size == expectedNumParts(h)) {
-        println("successful")
         p.success(xs)
         clear(h)
       }
@@ -90,7 +90,12 @@ object MediaUploader {
   case class UploadFailed(uploadId: String, e: Throwable)
 }
 
-class MediaUploader(endPoint: String, uploadId: String, data: BodyPart) extends Actor with S3Service with MediaResize {
+class MediaUploader(endPoint: String, uploadId: String, data: BodyPart)
+  extends Actor
+  with S3Service
+  with MediaResize
+  with ActorExecutionContextProvider
+{
   import MediaUploader._
 
   val resizeUpload = for {
@@ -113,8 +118,6 @@ class MediaUploader(endPoint: String, uploadId: String, data: BodyPart) extends 
     case Status.Failure(e) =>
       context.parent ! UploadFailed(uploadId, e)
   }
-
-  implicit def executionContext: ExecutionContext = context.dispatcher
 }
 
 trait MediaResize {
