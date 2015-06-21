@@ -41,8 +41,8 @@ object Build extends Build {
       libraryDependencies += reactiveRedis,
       libraryDependencies += awsScala,
       libraryDependencies += "net.ceedubs" %% "ficus" % "1.1.2",
-      libraryDependencies += "org.liquibase" % "liquibase-core" % "2.0.5",
-      libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.5"
+      libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.5",
+      libraryDependencies += "org.liquibase" % "liquibase-core" % "2.0.5"
     ) ++ liquibaseSettings ++ Seq (
       liquibaseUsername := liquibaseUsernameS,
       liquibasePassword := liquibasePasswordS,

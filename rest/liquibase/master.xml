@@ -31,13 +31,13 @@
         </createTable>
     </changeSet>
     <changeSet author="xuan_tuong (generated)" id="1434381489970-4">
-        <addForeignKeyConstraint baseColumnNames="follower_id" baseTableName="follower" baseTableSchemaName="instamua" constraintName="follower_follower_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencedTableSchemaName="instamua" referencesUniqueColumn="false"/>
+        <addForeignKeyConstraint baseColumnNames="follower_id" baseTableName="follower" constraintName="follower_follower_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencesUniqueColumn="false"/>
     </changeSet>
     <changeSet author="xuan_tuong (generated)" id="1434381489970-5">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="follower" baseTableSchemaName="instamua" constraintName="follower_user_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencedTableSchemaName="instamua" referencesUniqueColumn="false"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="follower"  constraintName="follower_user_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencesUniqueColumn="false"/>
     </changeSet>
     <changeSet author="xuan_tuong (generated)" id="1434381489970-6">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_private_info" baseTableSchemaName="instamua" constraintName="user_private_info_user_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencedTableSchemaName="instamua" referencesUniqueColumn="false"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_private_info" constraintName="user_private_info_user_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="user" referencesUniqueColumn="false"/>
     </changeSet>
     <changeSet author="xuan_tuong (generated)" id="1434381489970-7">
         <createIndex indexName="username" tableName="user" unique="true">

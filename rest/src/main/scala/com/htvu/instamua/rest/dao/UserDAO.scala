@@ -7,10 +7,9 @@ import slick.driver.MySQLDriver.api._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-object UserDAO extends LazyLogging{
-  // TODO: convert this to a class
-  val db = Database.forConfig("jdbc")
-
+class UserDAO extends LazyLogging {
+  val db:Database = Database.forConfig("jdbc")
+  
   val users = TableQuery[Users]
   val userPrivateInfos = TableQuery[UserPrivateInfos]
   val userCredentials = TableQuery[UserCredentials]
@@ -94,3 +93,5 @@ object UserDAO extends LazyLogging{
         (f => (f.userId, f.followerId, f.followBack)) update ((a, b, false)))
     else db.run(DBIO.seq(followers += Follower(b, a, followBack = false))) map(f => 1)
 }
+
+object UserDAO extends UserDAO

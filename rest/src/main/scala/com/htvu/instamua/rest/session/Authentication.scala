@@ -37,8 +37,8 @@ abstract class Authenticator extends ContextAuthenticator[SessionData] {
 //this provide authentication method
 trait SessionCookieAuthenticatorProvider extends StatefulSessionManagerDirectives[SessionData] with JsonSessionFormat with SettingsProvider {
   implicit val timeout = new Timeout(Duration(2, SECONDS))
-  implicit val manager = new RedisSessionManager[SessionData](ConfigFactory.load())
   import ExecutionContext.Implicits.global
+  implicit val manager = new RedisSessionManager[SessionData](ConfigFactory.load())
 
   val SessionCookieAuthenticator: Authenticator = new SessionCookieAuthenticatorImpl()
   val SessionCookieXsrfAuthenticator: Authenticator = new SessionCookieXsrfAuthenticatorImpl()
