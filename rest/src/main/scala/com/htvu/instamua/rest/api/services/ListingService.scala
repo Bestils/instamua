@@ -47,28 +47,6 @@ class ListingService()(implicit system: ActorSystem) extends Directives with Jso
           _ complete listingActor? DeleteListing(listingId)
         }
       } ~
-      pathPrefix("comments") {
-        pathEnd {
-          get {
-            _ complete (listingActor? GetComments(listingId)).mapTo[Option[List[Comment]]]
-          } ~
-          post {
-            handleWith { comment: Comment =>
-              (listingActor? NewComment(listingId, comment)).mapTo[String]
-            }
-          }
-        } ~
-        path(Segment) { commentId: String =>
-          put {
-            handleWith { comment: Comment =>
-              listingActor? UpdateComment(listingId, comment.copy(id = Some(commentId)))
-            }
-          } ~
-          delete {
-            _ complete listingActor? DeleteComment(listingId, commentId)
-          }
-        }
-      } ~
       pathPrefix("likes") {
         pathEnd {
           get {
@@ -76,7 +54,7 @@ class ListingService()(implicit system: ActorSystem) extends Directives with Jso
           } ~
           post {
             handleWith { comment: Comment =>
-              listingActor ? NewComment(listingId, comment)
+              ???
             }
           }
         } ~
@@ -96,11 +74,6 @@ object ListingActor {
   case class GetListing(listingId: String)
   case class UpdateListing(listingId: String, updated: ListingDetail)
   case class DeleteListing(listingId: String)
-
-  case class GetComments(listingId: String)
-  case class NewComment(listingId: String, comment: Comment)
-  case class UpdateComment(listingId: String, comment: Comment)
-  case class DeleteComment(listingId: String, commentId: String)
 
   case class GetLikes(listingId: String)
   case class NewLike(listingId: String, like: Like)
@@ -124,14 +97,6 @@ class ListingActor extends Actor with ListingDAO with ActorExecutionContextProvi
       updateListing(listingId, updated) pipeTo sender
     case DeleteListing(listingId) =>
       deleteListing(listingId) pipeTo sender
-    case GetComments(listingId) =>
-      getComments(listingId) pipeTo sender
-    case NewComment(listingId, comment) =>
-      createNewComment(listingId, comment) pipeTo sender
-    case UpdateComment(listingId, comment) =>
-      updateComment(listingId, comment) pipeTo sender
-    case DeleteComment(listingId, commentId) =>
-      deleteComment(listingId, commentId) pipeTo sender
     case GetLikes(listingId) =>
       getLikes(listingId) pipeTo sender
     case NewLike(listingId, like) =>

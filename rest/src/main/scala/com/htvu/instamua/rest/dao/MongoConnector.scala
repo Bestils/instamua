@@ -15,10 +15,12 @@ trait MongoConnector extends MongoConfig {
 
   val db = connection(DATABASE)
   val listings = db[BSONCollection](LISTINGS)
+  val comments = db[BSONCollection](COMMENTS)
 }
 
 trait MongoConfig {
   val HOSTS = Configs.mongo.getStringList("hosts")
   val DATABASE = Configs.mongo.getString("db")
   val LISTINGS = Configs.mongo.getString("collections.listings")
+  val COMMENTS = Configs.mongo.getString("collections.comments")
 }

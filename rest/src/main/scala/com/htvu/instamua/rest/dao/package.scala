@@ -121,11 +121,11 @@ package object dao {
   }
 
   case class Comment(
-                    id: Option[String],
+                    _id: Option[BSONObjectID],
+                    threadId: BSONObjectID,
                     text: String,
                     userId: Int,
-                    username: String,
-                    profilePicture: String
+                    username: String
                     )
   implicit val commentFormat = Macros.handler[Comment]
 
@@ -156,7 +156,7 @@ package object dao {
   case class Listing(
                       _id: Option[BSONObjectID],
                       details: ListingDetail,
-                      comments: List[Comment],
+                      threadId: Option[BSONObjectID],
                       likes: List[Like],
                       medias: List[Media]
                       )

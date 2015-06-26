@@ -1,6 +1,7 @@
 package com.htvu.instamua.rest.dao
 
 import reactivemongo.bson.{BSONObjectID, BSONDocument}
+import reactivemongo.core.commands.LastError
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,7 +12,7 @@ trait ListingDAO extends MongoConnector {
     listings.find(BSONDocument("_id" -> BSONObjectID(listingId))).one[Listing]
 
   def createNewListing(listing: Listing): Future[Any] =
-    listings.insert[Listing](listing)
+    listings.insert[Listing](listing.copy(threadId = Some(BSONObjectID.generate)))
 
   def updateListing(listingId: String, updated: ListingDetail): Future[Any] =
     listings.update(BSONDocument("_id" -> BSONObjectID(listingId)), BSONDocument("$set" -> BSONDocument("details" -> updated)))
@@ -19,21 +20,16 @@ trait ListingDAO extends MongoConnector {
   def deleteListing(listingId: String): Future[Any] =
     listings.remove(BSONDocument("_id" -> BSONObjectID(listingId)), firstMatchOnly = true)
 
+  def getComments(threadId: String): Future[List[Comment]] =
+    comments.find(BSONDocument("threadId" -> BSONObjectID(threadId))).cursor[Comment].collect[List]()
 
-  def getComments(listingId: String): Future[Option[List[Comment]]] =
-    listings.find(BSONDocument("_id" -> BSONObjectID(listingId)), BSONDocument("comments" -> 1)).one[CommentProjection] map (l => l.map(_.comments))
+  def createNewComment(comment: Comment): Future[LastError] = comments.insert[Comment](comment)
 
-  def createNewComment(listingId: String, comment: Comment): Future[String] = {
-    val added = comment.copy(id = Some(BSONObjectID.generate.stringify))
-    listings.update(BSONDocument("_id" -> BSONObjectID(listingId)), BSONDocument("$push" -> BSONDocument("comments" -> added))) map (_ => added.id.get)
-  }
+  def updateComment(comment: Comment): Future[LastError] =
+    comments.update(BSONDocument("_id" -> comment.threadId), BSONDocument("$set" -> BSONDocument("text" -> comment.text)))
 
-  def updateComment(listingId: String, comment: Comment): Future[Any] =
-    listings.update(BSONDocument("_id" -> BSONObjectID(listingId), "comments.id" -> comment.id.get), BSONDocument("$set" -> BSONDocument("comments.$" -> comment)))
-
-  def deleteComment(listingId: String, commentId: String): Future[Any] =
-    listings.update(BSONDocument("_id" -> BSONObjectID(listingId)), BSONDocument("$pull" -> BSONDocument("comments" -> BSONDocument("id" -> commentId))))
-
+  def deleteComment(commentId: String): Future[LastError] =
+    comments.remove(BSONDocument("_id" -> BSONObjectID(commentId)))
 
   def getLikes(listingId: String): Future[Option[List[Like]]] =
     listings.find(BSONDocument("_id" -> BSONObjectID(listingId)), BSONDocument("likes" -> 1)).one[LikeProjection] map (l => l.map(_.likes))

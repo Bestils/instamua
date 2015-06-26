@@ -4,7 +4,7 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import akka.io.IO
 import akka.util.Timeout
 import com.htvu.instamua.rest.api.RoutedHttpService
-import com.htvu.instamua.rest.api.services.{MediaService, ListingService, UserService, AuthService}
+import com.htvu.instamua.rest.api.services._
 import com.htvu.instamua.rest.session.{RedisSessionManager, StatefulSessionManagerDirectives}
 import com.typesafe.config.ConfigFactory
 import org.json4s.NoTypeHints
@@ -54,6 +54,7 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
   private val listingService = new ListingService()
   private val authService = new AuthService()
   private val mediaService = new MediaService()
+  private val commentService = new CommentService()
 
   //different rejection and exception handling go here
   //TODO: custom rejection handler REST format
@@ -78,6 +79,7 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
           userService.routes ~
           authService.routes ~
           listingService.routes ~
+          commentService.routes ~
           mediaService.routes
         }
       }
