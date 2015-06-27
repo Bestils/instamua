@@ -5,6 +5,7 @@ import akka.util.Timeout
 import com.htvu.instamua.rest.api.JsonFormats
 import com.htvu.instamua.rest.dao.{ListingDAO, Comment}
 import com.htvu.instamua.rest.util.ActorExecutionContextProvider
+import reactivemongo.core.commands.LastError
 import spray.routing.Directives
 import akka.pattern.{ pipe, ask}
 
@@ -23,18 +24,18 @@ class CommentService()(implicit system: ActorSystem) extends Directives with Jso
         _ complete (commentActor? GetComments(id)).mapTo[List[Comment]]
       } ~
       delete {
-        _ complete commentActor? DeleteComment(id)
+        _ complete (commentActor? DeleteComment(id)).mapTo[LastError]
       }
     } ~
     pathEnd {
       post {
         handleWith { comment: Comment =>
-          (commentActor? NewComment(comment)).mapTo[Boolean]
+          (commentActor? NewComment(comment)).mapTo[LastError]
         }
       } ~
       put {
         handleWith { comment: Comment =>
-          commentActor? UpdateComment(comment)
+          (commentActor? UpdateComment(comment)).mapTo[LastError]
         }
       }
     }

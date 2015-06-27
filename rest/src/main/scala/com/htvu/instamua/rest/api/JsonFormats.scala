@@ -2,13 +2,29 @@ package com.htvu.instamua.rest.api
 
 import com.htvu.instamua.rest.session.SessionData
 import com.redis.serialization.Format
-import org.json4s.NoTypeHints
+import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
+import reactivemongo.bson.BSONObjectID
 import spray.httpx.Json4sSupport
 
+import scala.util.Success
+
 trait JsonFormats extends Json4sSupport {
-  implicit def json4sFormats = org.json4s.DefaultFormats
+  implicit def json4sFormats = org.json4s.DefaultFormats + BSONObjectIDSerializer
+
+  val BSONObjectIDSerializer = new CustomSerializer[BSONObjectID](format => (
+    {
+      case JString(s) => BSONObjectID.parse(s) match {
+        case Success(id) => id
+        case _ => throw new Exception("invalid BSONObjectID format")
+      }
+      case _ => throw new Exception("invalid BSONObjectID format")
+    },
+    {
+      case id: BSONObjectID => JString(id.stringify)
+    }
+  ))
 }
 
 object JsonFormats extends Json4sSupport {

@@ -26,7 +26,7 @@ trait ListingDAO extends MongoConnector {
   def createNewComment(comment: Comment): Future[LastError] = comments.insert[Comment](comment)
 
   def updateComment(comment: Comment): Future[LastError] =
-    comments.update(BSONDocument("_id" -> comment.threadId), BSONDocument("$set" -> BSONDocument("text" -> comment.text)))
+    comments.update(BSONDocument("_id" -> comment._id.get), BSONDocument("$set" -> BSONDocument("text" -> comment.text)))
 
   def deleteComment(commentId: String): Future[LastError] =
     comments.remove(BSONDocument("_id" -> BSONObjectID(commentId)))
