@@ -23,6 +23,12 @@ class Settings(system: ExtendedActorSystem) extends Extension {
     val CookieSessionName:String = config.as[String]("spray.routing.session.cookie.name")
     val CookieCSRFName:String = config.as[String]("spray.routing.session.cookie.csrfName")
   }
+
+  //config of nodejs server
+  object NodeJs {
+    val Url = config.as[String]("nodejs.url")
+    val StaticDir = config.as[String]("nodejs.staticDir")
+  }
 }
 
 //allow access settings from implicit ActorRefFactory/ActorSystem;

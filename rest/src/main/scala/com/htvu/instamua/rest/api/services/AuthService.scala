@@ -19,13 +19,20 @@ import concurrent.Future
 import spray.routing.authentication.Authentication
 import com.htvu.instamua.rest.dao._
 import scala.concurrent._
+import scala.concurrent.duration._
 
+import akka.pattern.ask
+import akka.io.IO
+
+import spray.can.Http
+import spray.http._
+import HttpMethods._
 
 //StatefulSessionManagerDirectives[SessionData] with JsonSessionFormat
 class AuthService()(implicit system: ActorSystem) extends Directives with SessionCookieAuthenticatorProvider with SessionCookieAuthorizationProvider{
   implicit def actorRefFactory: ActorRefFactory = system
   implicit val ec = system.dispatcher
-  
+
   val routes = pathPrefix("auth") {
     cookieSession() { (id, map) =>
       pathPrefix("login"){

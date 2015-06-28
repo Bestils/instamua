@@ -55,7 +55,11 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
   private val authService = new AuthService()
   private val mediaService = new MediaService()
   private val commentService = new CommentService()
-
+  private val thirdPartyService = new ThirdPartyService();
+  
+  //static services
+  private val staticService = new StaticService()
+  
   //different rejection and exception handling go here
   //TODO: custom rejection handler REST format
   val ApiRejectionHandler = RejectionHandler.Default
@@ -80,16 +84,19 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
           authService.routes ~
           listingService.routes ~
           commentService.routes ~
-          mediaService.routes
+          mediaService.routes ~
+          thirdPartyService.routes
         }
       }
     }
   }
+  
   //serve static file from certain root
   val websiteRoutes = {
     handleExceptions(WebsiteExceptionHandler) {
       handleRejections(WebsiteRejectionHandler) {
-        getFromResourceDirectory("statics")
+        staticService.routes ~
+        getFromDirectory(settings.NodeJs.StaticDir)
       }
     }
   }
@@ -102,7 +109,8 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
   val routes = {
     decompressCompressIfRequested {
       enforceHttpsIf(settings.Http.EnforceHttps) {
-        apiRoutes ~ websiteRoutes
+        apiRoutes ~
+        websiteRoutes
       }
     }
   }
