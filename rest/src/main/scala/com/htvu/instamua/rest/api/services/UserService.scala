@@ -24,7 +24,7 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
     pathEnd {
       post {
         handleWith { userInfo: UserRegistrationInfo =>
-          (userActor ? RegisterNewUser(userInfo)).mapTo[Option[User]]
+          (userActor ? RegisterNewUser(userInfo)).mapTo[Int]
         }
       }
     } ~

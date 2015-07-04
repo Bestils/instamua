@@ -5,7 +5,9 @@ import com.typesafe.scalalogging.LazyLogging
 import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
+import com.github.t3hnar.bcrypt._
 
 class UserDAO extends LazyLogging {
   val db:Database = Database.forConfig("jdbc")
@@ -15,7 +17,15 @@ class UserDAO extends LazyLogging {
   val userCredentials = TableQuery[UserCredentials]
   val followers = TableQuery[Followers]
 
-  def createNewUser(userInfo: UserRegistrationInfo): Future[User] = ???
+  def createNewUser(info: UserRegistrationInfo): Future[Int] = {
+    val transaction = (for {
+      userId <- users.returning(users.map(_.id)) += User(-1, info.username, None, Some(info.location), None, None, None, None)
+      _ <- userCredentials +=  UserCredential(userId = userId, username = info.username, password = info.password.bcrypt)
+      _ <- userPrivateInfos += UserPrivateInfo(userId, info.email, None)
+    } yield userId) transactionally
+
+    db.run(transaction)
+  }
 
   def getUserInfo(userId: Int): Future[Option[User]] = {
     db.run(users.filter(_.id === userId).take(1).result.headOption)

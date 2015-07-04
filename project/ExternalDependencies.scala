@@ -39,5 +39,5 @@ object ExternalDependencies {
     "ch.qos.logback" % "logback-classic" % "1.1.2"
   )
 
-  val imageMagick = "org.im4java" % "im4java" % "1.4.0"
+  val scalaBcrypt = "com.github.t3hnar" %% "scala-bcrypt" % "2.4"
 }
