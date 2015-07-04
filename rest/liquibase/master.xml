@@ -23,7 +23,7 @@
     <changeSet author="xuan_tuong (generated)" id="1434381489970-3">
         <createTable tableName="user_private_info">
             <column name="user_id" type="INT UNSIGNED"/>
-            <column name="passwd" type="CHAR(60)"/>
+            <column name="password" type="CHAR(60)"/>
             <column name="salt" type="VARCHAR(60)"/>
             <column name="email" type="VARCHAR(30)"/>
             <column name="gender" type="TINYINT UNSIGNED"/>
