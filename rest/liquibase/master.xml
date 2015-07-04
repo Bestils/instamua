@@ -57,4 +57,18 @@
             <column name="role_id" type="INT UNSIGNED"/>
         </addColumn>
     </changeSet>
+    <changeSet id="1434381489970-9" author="hotienvu">
+        <createTable tableName="user_credential">
+            <column name="user_id" type="INT UNSIGNED"/>
+            <column name="password" type="CHAR(60)"/>
+            <column name="salt" type="VARCHAR(60)"/>
+        </createTable>
+
+        <sql>
+            insert into user_credential (select user_id, password, salt from user_private_info)
+        </sql>
+
+        <dropColumn tableName="user_private_info" columnName="password"/>
+        <dropColumn tableName="user_private_info" columnName="salt"/>
+    </changeSet>
 </databaseChangeLog>
