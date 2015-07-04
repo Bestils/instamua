@@ -71,4 +71,8 @@
         <dropColumn tableName="user_private_info" columnName="password"/>
         <dropColumn tableName="user_private_info" columnName="salt"/>
     </changeSet>
+
+    <changeSet id="1434381489970-10" author="hotienvu">
+        <dropColumn tableName="user_private_info" columnName="profile_picture"/>
+    </changeSet>
 </databaseChangeLog>

@@ -1,6 +1,5 @@
 package com.htvu.instamua.rest
 
-import com.github.tototoshi.slick.MySQLJodaSupport._
 import org.joda.time.DateTime
 import reactivemongo.bson._
 import slick.driver.MySQLDriver.api._
@@ -44,15 +43,15 @@ package object dao {
   
   case class UserRegistrationInfo(
                                    username: String,
-                                   passwd: String,
+                                   password: String,
                                    email: String,
                                    location: String
                                    )
 
   case class UserCredential(
                              userId: Int,
-                             password: String,
-                             salt: String
+                             username: String,
+                             password: String
                              )
 
   class UserCredentials(tag: Tag) extends Table[UserCredential](tag, "user_credential") {
@@ -70,8 +69,7 @@ package object dao {
   case class UserPrivateInfo (
                                userId: Int,
                                email: String,
-                               gender: Option[Byte],
-                               dob: Option[DateTime]
+                               gender: Option[Byte]
                                )
 
   class UserPrivateInfos(tag: Tag) extends Table[UserPrivateInfo](tag, "user_private_info") {
@@ -82,9 +80,8 @@ package object dao {
 
     def email = column[String]("email")
     def gender = column[Byte]("gender")
-    def dob = column[DateTime]("dob")
 
-    def * = (userId, email, gender.?, dob.?) <> (UserPrivateInfo.tupled, UserPrivateInfo.unapply)
+    def * = (userId, email, gender.?) <> (UserPrivateInfo.tupled, UserPrivateInfo.unapply)
   }
 
   case class Follower(
@@ -156,9 +153,9 @@ package object dao {
   case class Listing(
                       _id: Option[BSONObjectID],
                       details: ListingDetail,
-                      threadId: Option[BSONObjectID],
-                      likes: List[Like],
-                      medias: List[Media]
+                      threadId: Option[BSONObjectID] = None,
+                      likes: List[Like] = Nil,
+                      medias: List[Media] = Nil
                       )
   implicit val listingFormat = Macros.handler[Listing]
 
