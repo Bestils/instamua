@@ -7,7 +7,6 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import reactivemongo.bson.BSONObjectID
 import spray.httpx.Json4sSupport
-
 import scala.util.Success
 
 trait JsonFormats extends Json4sSupport {
@@ -52,4 +51,7 @@ trait JsonSessionFormat {
 
 object JsonSessionFormat extends JsonSessionFormat
 
-
+object RestJsonFormatProtocol extends Json4sSupport{
+  override implicit def json4sFormats: Formats = DefaultFormats
+  case class RestResponse(status: Option[String], errors: Option[String], data: Option[JValue])
+}

@@ -46,7 +46,7 @@ trait PageDirectives extends Directives with ActorRefFactoryProvider {
   }
 }
 
-trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider with PageDirectives{
+trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider with PageDirectives with LazyLogging{
   implicit val system = ActorSystem("user-services")
   implicit def actorRefFactory: ActorRefFactory = system
   
@@ -68,12 +68,22 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
   //rejection handler for static website
   val WebsiteRejectionHandler = RejectionHandler {
     case Nil ⇒ completeWithNotFoundPage()
-    case _   ⇒ completeWithInternalServerErrorPage()
+    case exception   ⇒ {
+      //make sure that we log the exception before return the internal server error
+      //TODO: specific rejection type might need to be handled separately
+      logger.error(exception.toString())
+      completeWithInternalServerErrorPage()
+    }
   }
 
   //exception handler
   val WebsiteExceptionHandler = ExceptionHandler {
-    case _ ⇒ completeWithInternalServerErrorPage()
+    case exception:Exception ⇒ {
+      //make sure that we log the exception before return the internal server error
+      exception.printStackTrace()
+      logger.error(exception.toString())
+      completeWithInternalServerErrorPage()
+    }
   }
   
   val apiRoutes = {

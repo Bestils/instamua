@@ -19,16 +19,23 @@ class UserDAO extends LazyLogging {
 
   def createNewUser(info: UserRegistrationInfo): Future[Int] = {
     val transaction = (for {
-      userId <- users.returning(users.map(_.id)) += User(-1, info.username, None, Some(info.location), None, None, None, None)
-      _ <- userCredentials +=  UserCredential(userId = userId, username = info.username, password = info.password.bcrypt)
-      _ <- userPrivateInfos += UserPrivateInfo(userId, info.email, None)
+      userId <- users.returning(users.map(_.id)) += User(-1, info.username, Some(info.fullName), Some(info.location), None, None, None, None, Some(info.ssoId))
     } yield userId) transactionally
 
+//    not being used -- credential is kept in centralized server
+//    _ <- userCredentials +=  UserCredential(userId = userId, username = info.username, password = info.password.bcrypt)
+//    _ <- userPrivateInfos += UserPrivateInfo(userId, info.email, None)
+    
     db.run(transaction)
   }
 
   def getUserInfo(userId: Int): Future[Option[User]] = {
     db.run(users.filter(_.id === userId).take(1).result.headOption)
+  }
+
+  //get user info based on SSO userid
+  def getUserInfoSSO(ssoId: Int): Future[Option[User]] = {
+    db.run(users.filter(_.ssoId === ssoId).take(1).result.headOption)
   }
 
   def getUserPrivateInfo(userId: Int): Future[Option[UserPrivateInfo]] =

@@ -26,41 +26,26 @@ import akka.io.IO
 
 import spray.can.Http
 import spray.http._
+import spray.client.pipelining._
 import HttpMethods._
 
 //StatefulSessionManagerDirectives[SessionData] with JsonSessionFormat
 class AuthService()(implicit system: ActorSystem) extends Directives with SessionCookieAuthenticatorProvider with SessionCookieAuthorizationProvider{
   implicit def actorRefFactory: ActorRefFactory = system
   implicit val ec = system.dispatcher
-
-  val routes = pathPrefix("auth") {
-    cookieSession() { (id, map) =>
-      pathPrefix("login"){
-        pathEnd {
-          get {
-            val userRoles: List[Role] = List(Role(1, "admin"), Role(2, "user"))
-            val sessionData = SessionData(Some(User(1, "sa", None, None, None, None, None, None)), Some(userRoles))
-            
-            updateSession(id, sessionData) {
-              session(id) { sessionObj =>
-                complete {
-                  <h1>Say hello to spray</h1>
-                }
-              }
-            }
-          }
+  case class RestResponse[T](status: Option[String], errors: Option[String], data: Option[T])
+  val routes = {
+    cookieSession() { (id, _) =>
+      path("oauth" / "login") {
+        parameters('code.as[String]) { (code) =>
+          //TODO: forward to go server to verify the authorize code
+          respondWithMediaType(`text/html`)(
+            _ complete "login success"
+          )
         }
-      }
-    } ~
-    path("restricted"){
-      authenticate(SessionCookieAuthenticator) { session ⇒
-        authorize(withRole(RoleType.ADMIN.id, session)) {
-          pathEnd {
-            complete {
-              <h1>Restricted Zone</h1>
-            }
-          }
-        }
+      } ~
+      path("oauth" / "test") {
+        _ complete ""
       }
     }
   }

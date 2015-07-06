@@ -16,8 +16,9 @@ package object dao {
                    location: Option[String],
                    bio: Option[String],
                    website: Option[String],
-                   profilePicture: Option[String],
-                   roleId: Option[Int]
+                   profilePicture: Option[String] = None,
+                   roleId: Option[Int] = None,
+                   ssoId: Option[Int] = None
                    )
 
   class Users(tag: Tag) extends Table[User](tag, "user") {
@@ -29,8 +30,9 @@ package object dao {
     def webSite = column[String]("web_site")
     def profilePicture = column[String]("profile_picture")
     def roleId = column[Int]("role_id")
+    def ssoId = column[Int]("sso_id")
     
-    def * = (id, username, fullName.?, location.?, bio.?, webSite.?, profilePicture.?, roleId.?) <> (User.tupled, User.unapply)
+    def * = (id, username, fullName.?, location.?, bio.?, webSite.?, profilePicture.?, roleId.?, ssoId.?) <> (User.tupled, User.unapply)
   }
 
   //one user can have multiple roles
@@ -40,20 +42,24 @@ package object dao {
   }
 
   case class Role(id: Int, description: String)
-  
+
   case class UserRegistrationInfo(
                                    username: String,
-                                   password: String,
+                                   password: String = "",
                                    email: String,
-                                   location: String
+                                   location: String,
+                                   fullName: String,
+                                   ssoId: Int = 0
                                    )
 
+  //@depreceated
   case class UserCredential(
                              userId: Int,
                              username: String,
                              password: String
                              )
 
+  //@depreceated
   class UserCredentials(tag: Tag) extends Table[UserCredential](tag, "user_credential") {
     def userId = column[Int]("user_id")
     def user = foreignKey("user_credential_user_fk", userId, TableQuery[Users])(_.id,
@@ -66,12 +72,14 @@ package object dao {
     def * = (userId, password, salt) <> (UserCredential.tupled, UserCredential.unapply)
   }
 
+  //@depreceated
   case class UserPrivateInfo (
                                userId: Int,
                                email: String,
                                gender: Option[Byte]
                                )
 
+  //@depreceated
   class UserPrivateInfos(tag: Tag) extends Table[UserPrivateInfo](tag, "user_private_info") {
     def userId = column[Int]("user_id")
     def user = foreignKey("user_private_info_user_fk", userId, TableQuery[Users])(_.id,

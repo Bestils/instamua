@@ -75,4 +75,10 @@
     <changeSet id="1434381489970-10" author="hotienvu">
         <dropColumn tableName="user_private_info" columnName="profile_picture"/>
     </changeSet>
+
+    <changeSet id="1434381489970-11" author="xuan_tuong">
+        <addColumn tableName="user">
+            <column name="sso_id" type="INT UNSIGNED"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

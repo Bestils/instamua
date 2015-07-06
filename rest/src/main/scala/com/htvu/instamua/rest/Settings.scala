@@ -29,6 +29,10 @@ class Settings(system: ExtendedActorSystem) extends Extension {
     val Url = config.as[String]("nodejs.url")
     val StaticDir = config.as[String]("nodejs.staticDir")
   }
+  
+  object SSO {
+    val Url = config.as[String]("sso.url")
+  }
 }
 
 //allow access settings from implicit ActorRefFactory/ActorSystem;
