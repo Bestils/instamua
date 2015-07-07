@@ -41,6 +41,4 @@ object ExternalDependencies {
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "ch.qos.logback" % "logback-classic" % "1.1.2"
   )
-
-  val scalaBcrypt = "com.github.t3hnar" %% "scala-bcrypt" % "2.4"
 }
