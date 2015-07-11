@@ -6,7 +6,9 @@ import akka.util.Timeout
 import com.htvu.instamua.rest.api.JsonFormats
 import com.htvu.instamua.rest.dao._
 import com.htvu.instamua.rest.util.ActorExecutionContextProvider
+import reactivemongo.core.commands.LastError
 import spray.routing.Directives
+
 
 class ListingService()(implicit system: ActorSystem) extends Directives with JsonFormats {
 
@@ -22,35 +24,35 @@ class ListingService()(implicit system: ActorSystem) extends Directives with Jso
     pathEnd {
       post {
         handleWith { listing: Listing =>
-          listingActor? NewListing(listing)
+          (listingActor? NewListing(listing)).toResponse[LastError]
         }
       }
     } ~
     path("search") {
       get {
         parameter("q") { query =>
-          _ complete (listingActor? SearchListing(query)).mapTo[List[Listing]]
+          _ complete (listingActor? SearchListing(query)).toResponse[List[Listing]]
         }
       }
     } ~
     pathPrefix(Segment) { listingId =>
       pathEnd {
         get {
-          _ complete (listingActor? GetListing(listingId)).mapTo[Option[Listing]]
+          _ complete (listingActor? GetListing(listingId)).toResponse[Option[Listing]]
         } ~
         put {
           handleWith { updated: ListingDetail =>
-            listingActor? UpdateListing(listingId, updated)
+            (listingActor? UpdateListing(listingId, updated)).toResponse[LastError]
           }
         } ~
         delete {
-          _ complete listingActor? DeleteListing(listingId)
+          _ complete (listingActor? DeleteListing(listingId)).toResponse[LastError]
         }
       } ~
       pathPrefix("likes") {
         pathEnd {
           get {
-            _ complete (listingActor ? GetLikes(listingId)).mapTo[Option[List[Like]]]
+            _ complete (listingActor ? GetLikes(listingId)).toResponse[Option[List[Like]]]
           } ~
           post {
             handleWith { comment: Comment =>
@@ -60,7 +62,7 @@ class ListingService()(implicit system: ActorSystem) extends Directives with Jso
         } ~
         path(Segment) { likeId =>
           delete {
-            _ complete listingActor ? UnLike(listingId, likeId)
+            _ complete (listingActor ? UnLike(listingId, likeId)).toResponse[LastError]
           }
         }
       }
@@ -91,7 +93,6 @@ class ListingActor extends Actor with ListingDAO with ActorExecutionContextProvi
     case NewListing(listing) =>
       createNewListing(listing) pipeTo sender
     case GetListing(listingId) =>
-      println(listingId)
       getListing(listingId) pipeTo sender
     case UpdateListing(listingId, updated) =>
       updateListing(listingId, updated) pipeTo sender

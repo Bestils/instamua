@@ -24,28 +24,18 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
     pathEnd {
       post {
         handleWith { userInfo: UserRegistrationInfo =>
-          (userActor ? RegisterNewUser(userInfo)).mapTo[Int]
+          (userActor ? RegisterNewUser(userInfo)).toResponse[Int]
         }
       }
     } ~
     pathPrefix(IntNumber) { userId =>
       pathEnd {
         get {
-          respondWithMediaType(`application/json`)(ctx =>
-            (userActor ? GetUserInfo(userId)).mapTo[Option[User]] onComplete {
-              case Success(userOption) => userOption match {
-                case None => ctx complete """{"error": "user not found"}"""
-                case Some(user) => {
-                  ctx complete user
-                }
-              }
-              case _ => ctx complete """{"error": "Some thing is wrong"}"""
-            }
-          )
+            _ complete (userActor ? GetUserInfo(userId)).toResponse[Option[User]]
         } ~
           put {
             handleWith { userInfo: User =>
-              (userActor ? UpdateUserInfo(userInfo)).mapTo[Try[Int]]
+              (userActor ? UpdateUserInfo(userInfo)).toResponse[Try[Int]]
             }
           }
       } ~
@@ -53,12 +43,12 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
         pathEnd {
           get {
             respondWithMediaType(`application/json`)(
-              _ complete (userActor ? GetUserPrivateInfo(userId)).mapTo[Option[UserPrivateInfo]]
+              _ complete (userActor ? GetUserPrivateInfo(userId)).toResponse[Option[UserPrivateInfo]]
             )
           } ~
             put {
               handleWith { userPrivateInfo: UserPrivateInfo =>
-                (userActor ? UpdateUserPrivateInfo(userPrivateInfo)).mapTo[Try[Int]]
+                (userActor ? UpdateUserPrivateInfo(userPrivateInfo)).toResponse[Try[Int]]
               }
             }
         }
@@ -73,26 +63,26 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
       path("followers") {
         get {
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetFollowers(userId)).mapTo[Seq[FollowerListResult]]
+            _ complete (userActor ? GetFollowers(userId)).toResponse[Seq[FollowerListResult]]
           }
         }
       } ~
       path("followings") {
         get {
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetFollowings(userId)).mapTo[Seq[FollowerListResult]]
+            _ complete (userActor ? GetFollowings(userId)).toResponse[Seq[FollowerListResult]]
           }
         }
       } ~
       path("relationship" / IntNumber) { otherId =>
         get {
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetRelationship(userId, otherId)).mapTo[Relationship]
+            _ complete (userActor ? GetRelationship(userId, otherId)).toResponse[Relationship]
           }
         } ~
         post {
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? PostRelationship(userId, otherId)).mapTo[Int]
+            _ complete (userActor ? PostRelationship(userId, otherId)).toResponse[Int]
           }
         }
       }
@@ -101,7 +91,7 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
       get {
         parameters("q") { query =>
           respondWithMediaType(`application/json`) {
-            _ complete (userActor ? SearchUser(query)).mapTo[Seq[UserSearchResult]]
+            _ complete (userActor ? SearchUser(query)).toResponse[Seq[UserSearchResult]]
           }
         }
       }
