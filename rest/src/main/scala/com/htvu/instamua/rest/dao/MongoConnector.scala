@@ -10,10 +10,11 @@ trait MongoConnector extends MongoConfig {
 
   // gets an instance of the driver
   // (creates an actor system)
-  val driver = new MongoDriver
-  val connection = driver.connection(HOSTS)
+  private val driver = new MongoDriver
+  private val connection = driver.connection(HOSTS)
 
-  val db = connection(DATABASE)
+  private val db = connection(DATABASE)
+
   val listings = db[BSONCollection](LISTINGS)
   val comments = db[BSONCollection](COMMENTS)
 }

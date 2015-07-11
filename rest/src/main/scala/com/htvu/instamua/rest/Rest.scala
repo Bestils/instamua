@@ -111,7 +111,7 @@ trait BootedCore extends HttpService with HttpsDirectives with SettingsProvider 
     }
   }
 
-  val decompressCompressIfRequested = (decompressRequest() & compressResponseIfRequested())
+  val decompressCompressIfRequested = decompressRequest() & compressResponseIfRequested()
 
   implicit val timeout = new Timeout(Duration(2, SECONDS))
   
