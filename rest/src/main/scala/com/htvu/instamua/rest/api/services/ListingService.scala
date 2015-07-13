@@ -30,8 +30,8 @@ class ListingService()(implicit system: ActorSystem) extends Directives with Jso
     } ~
     path("search") {
       get {
-        parameter("q") { query =>
-          _ complete (listingActor? SearchListing(query)).toResponse[List[Listing]]
+        parameter('q.?, 'page.as[Int] ? 0) { (query, page) =>
+          _ complete (listingActor? SearchListing(query, page)).toResponse[List[Listing]]
         }
       }
     } ~
@@ -81,7 +81,7 @@ object ListingActor {
   case class NewLike(listingId: String, like: Like)
   case class UnLike(listingId: String, likeId: String)
 
-  case class SearchListing(query: String)
+  case class SearchListing(query: Option[String], page: Int)
 
   def props(): Props = Props(new ListingActor())
 }
@@ -104,8 +104,8 @@ class ListingActor extends Actor with ListingDAO with ActorExecutionContextProvi
       createNewLike(listingId, like) pipeTo sender
     case UnLike(listingId, likeId) =>
       unlike(listingId, likeId) pipeTo sender
-    case SearchListing(query) =>
-      search(query) pipeTo sender
+    case SearchListing(query, page) =>
+      search(query, page) pipeTo sender
   }
 }
 

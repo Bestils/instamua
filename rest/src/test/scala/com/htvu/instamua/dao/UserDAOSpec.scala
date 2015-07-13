@@ -120,6 +120,36 @@ class UserDAORelationshipSpec extends FeatureSpec with MySqlSpec with GivenWhenT
       assert(followings(A).contains(B) === false)
     }
   }
+
+  feature("User's followers are paginated") {
+    var (a, b, c, d) = (0, 0, 0, 0)
+    scenario("When there is only one page") {
+      Given("An user that are followed by 2 people")
+      a = Await.result(userDAO.createNewUser(UserRegistrationInfo("1", "", "1@test.com", "hanoi", "user 1")), 1.seconds)
+      b = Await.result(userDAO.createNewUser(UserRegistrationInfo("2", "", "2@test.com", "hanoi", "user 2")), 1.seconds)
+      c = Await.result(userDAO.createNewUser(UserRegistrationInfo("3", "", "3@test.com", "hanoi", "user 3")), 1.seconds)
+      userDAO.postRelationship(b, a, NO_REL)
+      userDAO.postRelationship(c, a, NO_REL)
+
+      When("Query this user followes with page size = 2")
+
+      Then("results should contain only one page")
+      assert(Await.result(userDAO.getFollowers(a, 0, 2), 1.seconds).size === 2)
+      assert(Await.result(userDAO.getFollowers(a, 1, 2), 1.seconds).size === 0)
+    }
+
+    scenario("When there are more than one pages") {
+      Given("An user that are followed by 3 people")
+      d = Await.result(userDAO.createNewUser(UserRegistrationInfo("4", "", "4@test.com", "hanoi", "user 4")), 1.seconds)
+      userDAO.postRelationship(d, a, NO_REL)
+
+      When("Query this user followes with page size = 2")
+
+      Then("results should contain only two page")
+      assert(Await.result(userDAO.getFollowers(a, 0, 2), 1.seconds).size === 2)
+      assert(Await.result(userDAO.getFollowers(a, 1, 2), 1.seconds).size === 1)
+    }
+  }
 }
 
 
@@ -134,7 +164,7 @@ class UserDAOCRUDSpec extends FeatureSpec with MySqlSpec with GivenWhenThen with
   info("I want to be able to update my information")
   info("I want to be able to see an user public information")
   info("I want to see all users that an user follows")
-  info("I want to see be able to search for a particular using username or full name")
+  info("I want to see be able to search for a particular using username or full name and the results are paginated")
 
   feature("User registration") {
     // since the actual verification is handled by external auth service
@@ -189,7 +219,7 @@ class UserDAOCRUDSpec extends FeatureSpec with MySqlSpec with GivenWhenThen with
     }
   }
 
-  feature("Search for user with username or password") {
+  feature("Search for user with username or fullname") {
     val uid1 = Await.result(userDAO.createNewUser(UserRegistrationInfo("hotienvu", "password", "hotienvu@test.com", "vietnam", "Ho Tien Vu")), 1.seconds)
     val user1 = (uid1, "hotienvu", Some("Ho Tien Vu"), None)
 
@@ -227,6 +257,31 @@ class UserDAOCRUDSpec extends FeatureSpec with MySqlSpec with GivenWhenThen with
 
       Then("It should return an empty list")
       assert(results.isEmpty)
+    }
+  }
+
+  feature("Search for user returns paginated results") {
+    scenario("When there is only one page") {
+      Given("2 users")
+      Await.result(userDAO.createNewUser(UserRegistrationInfo("_1", "", "1@test.com", "hanoi", "user 1", 1)), 1.seconds)
+      Await.result(userDAO.createNewUser(UserRegistrationInfo("_2", "", "2@test.com", "hanoi", "user 2", 1)), 1.seconds)
+
+      When("Search for user with page size = 3")
+
+      Then("It should return all matching users in one page")
+      assert(Await.result(userDAO.searchUser("user", 0, 3), 1.seconds).size === 2)
+      assert(Await.result(userDAO.searchUser("user", 1, 3), 1.seconds).isEmpty)
+    }
+
+    scenario("When there are more than one pages") {
+      Given("3 users")
+      Await.result(userDAO.createNewUser(UserRegistrationInfo("_3", "", "3@test.com", "hanoi", "user 3", 1)), 1.seconds)
+
+      When("Search for user with page size = 2")
+
+      Then("It should return all matching users in 2 pages")
+      assert(Await.result(userDAO.searchUser("user", 0, 2), 1.seconds).size === 2)
+      assert(Await.result(userDAO.searchUser("user", 1, 2), 1.seconds).size === 1)
     }
   }
 }

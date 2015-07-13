@@ -1,5 +1,6 @@
 package com.htvu.instamua.rest.dao
 
+import reactivemongo.api.QueryOpts
 import reactivemongo.bson.{BSONObjectID, BSONDocument}
 import reactivemongo.core.commands.LastError
 
@@ -41,8 +42,10 @@ trait ListingDAO extends MongoConnector {
   def unlike(listingId: String, likeId: String): Future[LastError] =
     listings.update(BSONDocument("_id" -> BSONObjectID(listingId)), BSONDocument("$pull" -> BSONDocument("likes" -> BSONDocument("id" -> likeId))))
 
-  def search(query: String): Future[List[Listing]] =
-    listings.find(BSONDocument("$text" -> BSONDocument("$search" -> query))).cursor[Listing].collect[List]()
+  def search(query: Option[String] = None, page: Int = 0, limit: Int = 10): Future[List[Listing]] =
+    listings.find(BSONDocument("$text" -> BSONDocument("$search" -> query)))
+      .copy(options=QueryOpts(page*limit, limit))
+      .cursor[Listing].collect[List]()
 }
 
 

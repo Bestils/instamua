@@ -7,10 +7,9 @@ import com.htvu.instamua.rest.api.JsonFormats
 import com.htvu.instamua.rest.dao.Relationship.Relationship
 import com.htvu.instamua.rest.dao._
 import com.htvu.instamua.rest.util.ActorExecutionContextProvider
-import spray.http.MediaTypes.`application/json`
 import spray.routing.Directives
 
-import scala.util.{Success, Try}
+import scala.util.Try
 
 class UserService()(implicit system: ActorSystem) extends Directives with JsonFormats {
   import UserActor._
@@ -42,9 +41,7 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
       path("private-info") {
         pathEnd {
           get {
-            respondWithMediaType(`application/json`)(
-              _ complete (userActor ? GetUserPrivateInfo(userId)).toResponse[Option[UserPrivateInfo]]
-            )
+            _ complete (userActor ? GetUserPrivateInfo(userId)).toResponse[Option[UserPrivateInfo]]
           } ~
             put {
               handleWith { userPrivateInfo: UserPrivateInfo =>
@@ -55,52 +52,42 @@ class UserService()(implicit system: ActorSystem) extends Directives with JsonFo
       } ~
       path("listings" / "recent") {
         get {
-          respondWithMediaType(`application/json`) {
-            _ complete """{"recent listings": "OK"}"""
-          }
+          _ complete """{"recent listings": "OK"}"""
         }
       } ~
       path("followers") {
         get {
-          respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetFollowers(userId)).toResponse[Seq[FollowerListResult]]
+          parameter('page.as[Int] ? 0) { page =>
+            _ complete (userActor ? GetFollowers(userId, page)).toResponse[Seq[FollowerListResult]]
           }
         }
       } ~
       path("followings") {
         get {
-          respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetFollowings(userId)).toResponse[Seq[FollowerListResult]]
+          parameter('page.as[Int] ? 0) { page =>
+            _ complete (userActor ? GetFollowings(userId, page)).toResponse[Seq[FollowerListResult]]
           }
         }
       } ~
       path("relationship" / IntNumber) { otherId =>
         get {
-          respondWithMediaType(`application/json`) {
-            _ complete (userActor ? GetRelationship(userId, otherId)).toResponse[Relationship]
-          }
+          _ complete (userActor ? GetRelationship(userId, otherId)).toResponse[Relationship]
         } ~
         post {
-          respondWithMediaType(`application/json`) {
             _ complete (userActor ? PostRelationship(userId, otherId)).toResponse[Int]
-          }
         }
       }
     } ~
     path("search") {
       get {
-        parameters("q") { query =>
-          respondWithMediaType(`application/json`) {
-            _ complete (userActor ? SearchUser(query)).toResponse[Seq[UserSearchResult]]
-          }
+        parameters('q, 'page.as[Int] ? 0  ) { (query, page) =>
+          _ complete (userActor ? SearchUser(query, page)).toResponse[Seq[UserSearchResult]]
         }
       }
     } ~
     path("self" / "feed") {
       get {
-        respondWithMediaType(`application/json`) {
-          _ complete """{"feeds": "OK"}"""
-        }
+        _ complete """{"feeds": "OK"}"""
       }
     }
   }
@@ -112,9 +99,9 @@ object UserActor {
   case class GetUserPrivateInfo(userId: Int)
   case class UpdateUserInfo(newInfo: User)
   case class UpdateUserPrivateInfo(newPrivateInfo: UserPrivateInfo)
-  case class SearchUser(query: String)
-  case class GetFollowers(userId: Int)
-  case class GetFollowings(userId: Int)
+  case class SearchUser(query: String, page: Int)
+  case class GetFollowers(userId: Int, page: Int)
+  case class GetFollowings(userId: Int, page: Int)
   case class GetRelationship(userId: Int, otherId: Int)
   case class PostRelationship(userId: Int, otherId: Int)
 
@@ -136,12 +123,12 @@ class UserActor extends Actor with ActorExecutionContextProvider {
       UserDAO.updateUserInfo(newUserInfo) pipeTo sender
     case UpdateUserPrivateInfo(newUserPrivateInfo: UserPrivateInfo) =>
       UserDAO.updateUserPrivateInfo(newUserPrivateInfo) pipeTo sender
-    case SearchUser(query) =>
-      UserDAO.searchUser(query) pipeTo sender
-    case GetFollowers(userId) =>
-      UserDAO.getFollowers(userId) pipeTo sender
-    case GetFollowings(userId) =>
-      UserDAO.getFollowings(userId) pipeTo sender
+    case SearchUser(query, page) =>
+      UserDAO.searchUser(query, page) pipeTo sender
+    case GetFollowers(userId, page) =>
+      UserDAO.getFollowers(userId, page) pipeTo sender
+    case GetFollowings(userId, page) =>
+      UserDAO.getFollowings(userId, page) pipeTo sender
     case GetRelationship(userId, otherId) =>
       UserDAO.getRelationship(userId, otherId) pipeTo sender
     case PostRelationship(userId, otherId) =>

@@ -5,7 +5,6 @@ import com.typesafe.scalalogging.LazyLogging
 import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
 class UserDAO extends LazyLogging {
@@ -42,9 +41,10 @@ class UserDAO extends LazyLogging {
     db.run(updateUserPrivateInfo.update(newPrivateInfo).asTry)
   }
 
-  def searchUser(query: String): Future[Seq[UserSearchResult]] = {
+  def searchUser(query: String, page: Int = 0, limit: Int = 10): Future[Seq[UserSearchResult]] = {
         db.run(sql"""select user_id, username, full_name, profile_picture
-               from user where username like '%#$query%' or full_name like '%#$query%'""".as[UserSearchResult])
+               from user where username like '%#$query%' or full_name like '%#$query%'
+               order by user_id limit #${page*limit},#$limit""".as[UserSearchResult])
 
     // TODO: replace sql with the implementation below
 //    val q = for {
@@ -55,24 +55,25 @@ class UserDAO extends LazyLogging {
   }
 
   // RelationshipService
-  def getFollowers(a: Int): Future[Seq[FollowerListResult]] = {
+  def getFollowers(a: Int, page: Int = 0, limit: Int = 10): Future[Seq[FollowerListResult]] = {
     val fs = followers filter (f => f.userId === a) map (f => (f.followerId, f.followBack)) union
             (followers filter (f => f.followerId === a && f.followBack) map (f => (f.userId, f.followBack)))
     val query = for {
       f <- fs
       u <- users if u.id === f._1
     } yield (u.id, u.username, u.fullName.?, u.profilePicture.?, f._2)
-    db.run(query.result)
+
+    db.run(query drop(page*limit) take(limit) sortBy(_._1) result)
   }
 
-  def getFollowings(a: Int): Future[Seq[FollowerListResult]] = {
+  def getFollowings(a: Int, page: Int = 0, limit: Int = 10): Future[Seq[FollowerListResult]] = {
     val fs = followers filter (f => f.followerId === a) map (f => (f.userId, f.followBack)) union
       (followers filter(f => f.userId === a && f.followBack) map (f => (f.followerId, f.followBack)))
     val query = for {
       f <- fs
       u <- users if u.id === f._1
     } yield (u.id, u.username, u.fullName.?, u.profilePicture.?, f._2)
-    db.run(query.result)
+    db.run(query drop(page*limit) take(limit) sortBy(_._1) result)
   }
 
   def getRelationship(a: Int, b: Int)(implicit exec: ExecutionContext): Future[Relationship] =
